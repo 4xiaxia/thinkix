@@ -16,6 +16,7 @@ import {
 import { withGroup, withImage } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
+import { withScribble, ScribbleTool } from './scribble';
 
 import { ThinkixProvider, useThinkix } from './hooks/use-thinkix';
 import { ThinkixToolbar } from './ThinkixToolbar';
@@ -38,26 +39,6 @@ function ThinkixBoardInner({ initialValue = [], className }: ThinkixBoardProps) 
     themeColors: MindThemeColors,
   };
 
-  const withDebug = (board: PlaitBoard) => {
-    const { pointerDown, pointerMove, pointerUp } = board;
-
-    board.pointerDown = (event: PointerEvent) => {
-      console.log('Debug: pointerDown', { pointer: board.pointer, event });
-      pointerDown(event);
-    };
-
-    board.pointerMove = (event: PointerEvent) => {
-      pointerMove(event);
-    };
-
-    board.pointerUp = (event: PointerEvent) => {
-      console.log('Debug: pointerUp', { pointer: board.pointer });
-      pointerUp(event);
-    };
-
-    return board;
-  };
-
   const plugins: PlaitPlugin[] = [
     withSelection,
     withImage,
@@ -66,7 +47,7 @@ function ThinkixBoardInner({ initialValue = [], className }: ThinkixBoardProps) 
     withMind,
     withHistory,
     withHotkey,
-    withDebug,
+    withScribble, // Custom scribble/drawing plugin
   ];
 
   const theme: PlaitTheme = {
