@@ -4,16 +4,16 @@ import { Options } from 'roughjs/bin/core';
 import { ScribbleElement } from './types';
 import {
   applyGaussianSmoothing,
-  getElementFill,
-  getElementStrokeColor,
+  getStrokeColorByElement,
+  getFillByElement,
 } from './helpers';
 import { getStrokeWidthByElement } from '@plait/draw';
 
 export class ScribbleRenderer extends Generator<ScribbleElement> {
   protected draw(element: ScribbleElement): SVGGElement | undefined {
     const strokeWidth = getStrokeWidthByElement(element);
-    const strokeColor = getElementStrokeColor(this.board, element);
-    const fill = getElementFill(this.board, element);
+    const strokeColor = getStrokeColorByElement(this.board, element);
+    const fill = getFillByElement(this.board, element);
 
     const renderOptions: Options = {
       strokeWidth,
