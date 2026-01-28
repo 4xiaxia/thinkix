@@ -10,13 +10,19 @@ import {
   Selection,
   ThemeColorMode,
 } from '@plait/core';
-import { ScribbleElement, ScribbleTool, ScribbleColorPalette } from './types';
 import {
-  DefaultDrawStyle,
+  ScribbleElement,
+  ScribbleTool,
+  ScribbleColorPalette,
+  SCRIBBLE_ELEMENT_TYPE,
+} from './types';
+import {
   isClosedCustomGeometry,
   isClosedPoints,
   isHitPolyLine,
   isRectangleHitRotatedPoints,
+  getStrokeColorByElement,
+  getFillByElement,
 } from '@plait/draw';
 
 export function getScribbleToolPointers() {
@@ -85,28 +91,10 @@ export const getDefaultFill = (theme: ThemeColorMode) => {
   return ScribbleColorPalette[theme].fill;
 };
 
-export const getElementStrokeColor = (
-  board: PlaitBoard,
-  element: PlaitElement
-) => {
-  const themeColor = getDefaultStrokeColor(board.theme.themeColorMode);
-  return element.strokeColor || themeColor;
-};
+// Use Plait's built-in functions where available
+export { getStrokeColorByElement, getFillByElement };
 
-export const getElementFill = (
-  board: PlaitBoard,
-  element: PlaitElement
-) => {
-  const defaultFill =
-    ScribbleElement.isScribble(element) &&
-    isClosedCustomGeometry(board, element)
-      ? getDefaultFill(board.theme.themeColorMode)
-      : DefaultDrawStyle.fill;
-  return element.fill || defaultFill;
-};
-
-export const SCRIBBLE_ELEMENT_TYPE = 'scribble';
-
+// Gaussian smoothing utilities (not provided by Plait)
 export function computeGaussianWeight(offset: number, sigma: number) {
   return Math.exp(-(offset * offset) / (2 * sigma * sigma));
 }
