@@ -16,6 +16,7 @@ import {
 import { withGroup } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
+import { withCommon } from '../plugins/with-common';
 import { withScribble } from '../plugins/scribble';
 import { withImageHandle } from '../plugins/with-image-handle';
 import { useBoardState } from '../hooks/use-board-state';
@@ -49,6 +50,7 @@ export function BoardCanvas({
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
+    withCommon,
     withSelection,
     withDraw,
     withGroup,
