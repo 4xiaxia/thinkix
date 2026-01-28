@@ -60,10 +60,10 @@ const shapeTools: { id: ThinkixTool; icon: React.ReactNode; label: string }[] = 
   { id: 'star', icon: <Star className="h-4 w-4" />, label: 'Star' },
   { id: 'cloud', icon: <Cloud className="h-4 w-4" />, label: 'Cloud' },
   { id: 'arrow', icon: <ArrowRight className="h-4 w-4" />, label: 'Arrow' },
-  { id: 'mind', icon: <Brain className="h-4 w-4" />, label: 'Mind Map' },
 ];
 
 const otherTools: { id: ThinkixTool; icon: React.ReactNode; label: string }[] = [
+  { id: 'mind', icon: <Brain className="h-4 w-4" />, label: 'Mind Map' },
   { id: 'text', icon: <Type className="h-4 w-4" />, label: 'Text' },
   { id: 'image', icon: <ImageIcon className="h-4 w-4" />, label: 'Image' },
 ];
@@ -94,6 +94,7 @@ export function ThinkixToolbar() {
   };
 
   const isShapeActive = shapeTools.some(t => t.id === activeTool);
+  const activeShapeTool = shapeTools.find(t => t.id === activeTool);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -133,7 +134,7 @@ export function ThinkixToolbar() {
                 className="h-9 w-9"
                 aria-label="Shapes"
               >
-                <Square className="h-4 w-4" />
+                {activeShapeTool ? activeShapeTool.icon : <Square className="h-4 w-4" />}
                 <ChevronDown className="h-3 w-3 absolute bottom-1 right-0 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
