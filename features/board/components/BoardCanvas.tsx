@@ -17,6 +17,7 @@ import { withGroup, withImage } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
 import { withScribble } from '../plugins/scribble';
+import { withImageHandle } from '../plugins/with-image-handle';
 import { useBoardState } from '../hooks/use-board-state';
 
 import '@/app/styles/plait-react-board.css';
@@ -49,12 +50,13 @@ export function BoardCanvas({
 
   const plugins: PlaitPlugin[] = [
     withSelection,     // Handle element selection
-    withImage,         // Image support
+    withImage,         // Image rendering support
     withDraw,          // Drawing primitives
     withGroup,         // Grouping support
     withMind,          // Mind map support
     withHistory,       // Undo/redo
     withHotkey,        // Keyboard shortcuts
+    withImageHandle,   // Enhanced image (drag-drop, paste, view)
     withScribble,      // Custom scribble/drawing plugin
   ];
 
