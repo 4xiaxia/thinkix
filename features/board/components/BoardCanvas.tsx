@@ -13,7 +13,7 @@ import {
   withHistory,
   withHotkey,
 } from '@plait/core';
-import { withGroup, withImage } from '@plait/common';
+import { withGroup } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
 import { withScribble } from '../plugins/scribble';
@@ -49,15 +49,14 @@ export function BoardCanvas({
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
-    withSelection,     // Handle element selection
-    withImage,         // Image rendering support
-    withDraw,          // Drawing primitives
-    withGroup,         // Grouping support
-    withMind,          // Mind map support
-    withHistory,       // Undo/redo
-    withHotkey,        // Keyboard shortcuts
-    withImageHandle,   // Enhanced image (drag-drop, paste, view)
-    withScribble,      // Custom scribble/drawing plugin
+    withSelection,
+    withDraw,
+    withGroup,
+    withMind,
+    withHistory,
+    withHotkey,
+    withImageHandle,
+    withScribble,
   ];
 
   const handleChange = (data: BoardChangeData) => {
