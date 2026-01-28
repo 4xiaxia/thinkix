@@ -7,30 +7,32 @@ import { PlaitBoard } from '@plait/core';
 import { createRoot } from 'react-dom/client';
 import { Image } from './image-component';
 
-export function withCommon(board: PlaitBoard): PlaitBoard {
-  const newBoard = board as PlaitBoard & PlaitImageBoard;
+export function addImageRenderer(board: PlaitBoard): PlaitBoard {
+  const imageBoard = board as PlaitBoard & PlaitImageBoard;
 
-  newBoard.renderImage = (
+  imageBoard.renderImage = (
     container: Element | DocumentFragment,
     props: ImageProps
   ) => {
     const root = createRoot(container);
     root.render(<Image {...props} />);
 
-    let currentProps = { ...props };
+    let activeProps = { ...props };
+
     const ref: RenderComponentRef<ImageProps> = {
       destroy: () => {
-        setTimeout(() => {
+        requestIdleCallback(() => {
           root.unmount();
-        }, 0);
+        });
       },
       update: (updatedProps: Partial<ImageProps>) => {
-        currentProps = { ...currentProps, ...updatedProps };
-        root.render(<Image {...currentProps} />);
+        activeProps = { ...activeProps, ...updatedProps };
+        root.render(<Image {...activeProps} />);
       },
     };
+
     return ref;
   };
 
-  return newBoard;
+  return imageBoard;
 }

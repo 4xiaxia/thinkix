@@ -16,9 +16,11 @@ import {
 import { withGroup } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
-import { withCommon } from '../plugins/with-common';
+import { addImageRenderer } from '../plugins/add-image-renderer';
+import { addEmojiRenderer } from '../plugins/add-emoji-renderer';
+import { addPenMode } from '../plugins/add-pen-mode';
+import { addImageInteractions } from '../plugins/add-image-interactions';
 import { withScribble } from '../plugins/scribble';
-import { withImageHandle } from '../plugins/with-image-handle';
 import { useBoardState } from '../hooks/use-board-state';
 
 import '@/app/styles/plait-react-board.css';
@@ -50,14 +52,16 @@ export function BoardCanvas({
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
-    withCommon,
+    addImageRenderer,
     withSelection,
     withDraw,
     withGroup,
     withMind,
+    addEmojiRenderer,
     withHistory,
     withHotkey,
-    withImageHandle,
+    addPenMode,
+    addImageInteractions,
     withScribble,
   ];
 
