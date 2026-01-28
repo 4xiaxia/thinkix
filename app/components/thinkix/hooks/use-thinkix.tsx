@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
 import { PlaitBoard, PlaitPointerType, BoardTransforms } from '@plait/core';
-import { BoardCreationMode, setCreationMode } from '@plait/common';
+import { BoardCreationMode, setCreationMode, selectImage } from '@plait/common';
+import { insertImage } from '@plait/draw';
 
 export type ThinkixTool =
     | 'select'
@@ -45,7 +46,7 @@ const TOOL_TO_POINTER: Record<ThinkixTool, string> = {
     'hand': PlaitPointerType.hand,
     'select': PlaitPointerType.selection,
     'mind': 'mind',
-    'draw': 'vectorLine',
+    'draw': 'ink', // Scribble/freehand drawing
     // Basic shapes
     'rectangle': 'rectangle',
     'ellipse': 'ellipse',
@@ -99,6 +100,15 @@ export function ThinkixProvider({ children }: { children: React.ReactNode }): Re
 
         const currentBoard = boardRef.current;
         if (currentBoard) {
+            if (tool === 'image') {
+                selectImage(currentBoard, 400, (imageItem) => {
+                    insertImage(currentBoard, imageItem);
+                    setState(prev => ({ ...prev, activeTool: 'select' }));
+                    BoardTransforms.updatePointerType(currentBoard, PlaitPointerType.selection);
+                });
+                return;
+            }
+
             const pointerType = TOOL_TO_POINTER[tool];
             console.log('Updating pointer type to:', pointerType, 'current pointer:', currentBoard.pointer);
 
