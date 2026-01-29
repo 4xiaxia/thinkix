@@ -1,0 +1,26 @@
+{
+  "name": "@thinkix/plait-utils",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./lib/index.ts",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.ts",
+    "./commands": "./lib/commands.ts",
+    "./types": "./lib/types.ts"
+  },
+  "scripts": {
+    "lint": "eslint \"lib/**/*.ts*\"",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@plait/core": "^0.92.1",
+    "@plait/mind": "^0.92.1",
+    "@plait/common": "^0.92.1"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
