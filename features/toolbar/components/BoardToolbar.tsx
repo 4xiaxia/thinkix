@@ -29,21 +29,21 @@ import {
   deleteFragment,
   duplicateElements,
 } from '@plait/core';
-import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@thinkix/ui';
+import { ToggleGroup, ToggleGroupItem } from '@thinkix/ui';
+import { Separator } from '@thinkix/ui';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@thinkix/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@thinkix/ui';
 import { useBoardState } from '@/features/board/hooks/use-board-state';
 import type { DrawingTool } from '@/shared/types';
 import {

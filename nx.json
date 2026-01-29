@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "workspaceVersion": "2",
+  "namedInputs": {
+    "default": [
+      "{workspaceRoot}/**/*"
+    ]
+  },
+  "targetDefaults": {},
+  "plugins": [],
+  "generators": []
+}
