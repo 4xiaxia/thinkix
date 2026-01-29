@@ -1,14 +1,14 @@
 import type { PlaitBoard, PlaitElement } from '@plait/core';
-import { MindElement } from '@plait/mind';
+import { getSelectedElements } from '@plait/core';
 
-export function getSelectedMindElements(board: PlaitBoard): MindElement[] {
-  const selected = board.selection ? board.selection : [];
-  return selected.filter((e) => MindElement.isMindElement(board, e)) as MindElement[];
+export function getSelectedMindElements(board: PlaitBoard) {
+  const selected = getSelectedElements(board);
+  return selected; // Can be filtered by caller if needed
 }
 
 export function getCanvasContext(board: PlaitBoard): string {
-  const elements = PlaitBoard.getValue(board);
-  const selected = board.selection || [];
+  const elements = board.children;
+  const selected = getSelectedElements(board);
 
   return JSON.stringify({
     elements,
@@ -18,6 +18,5 @@ export function getCanvasContext(board: PlaitBoard): string {
 }
 
 export function findElementById(board: PlaitBoard, id: string): PlaitElement | null {
-  const elements = PlaitBoard.getValue(board) as PlaitElement[];
-  return elements.find((e) => e.id === id) || null;
+  return board.children.find((e) => e.id === id) || null;
 }
