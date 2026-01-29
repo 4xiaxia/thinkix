@@ -12,6 +12,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.2.0",
+    "@ai-sdk/openai": "^1.2.0",
+    "@ai-sdk/react": "^1.1.0",
+    "ai": "^4.0.0",
     "@plait-board/react-board": "0.4.0-2",
     "@plait-board/react-text": "^0.4.0-0",
     "@plait/common": "^0.92.1",
