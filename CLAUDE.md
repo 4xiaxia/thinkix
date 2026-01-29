@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Thinkix is an infinite canvas whiteboard application built with Next.js 16, React 19, and the Plait board library. It provides a collaborative thinking space with support for mind maps, freehand drawing, shapes, text, and images.
+Thinkix is an infinite canvas whiteboard application built with Next.js 16, React 19, and the Plait board library. It provides a collaborative thinking space with support for mind maps, freehand drawing, shapes, text, and images. The project uses an NX-style monorepo with workspace packages for shared code.
 
 ## Development Commands
 
@@ -13,7 +13,43 @@ yarn dev      # Start development server (Turbopack, http://localhost:3000)
 yarn build    # Build for production
 yarn start    # Start production server
 yarn lint     # Run ESLint
+yarn install  # Install workspace dependencies
 ```
+
+## Monorepo Structure
+
+The project uses Yarn workspaces with the following structure:
+
+```
+thinkix/
+├── packages/              # Workspace packages
+│   ├── ui/               # @thinkix/ui - Shared UI components (shadcn-based)
+│   ├── ai/               # @thinkix/ai - AI SDK integration and utilities
+│   └── plait-utils/      # @thinkix/plait-utils - Plait board helpers
+│
+├── features/             # Feature modules (board, toolbar, etc.)
+├── app/                  # Next.js app router and API routes
+└── shared/               # Shared types and constants
+```
+
+### Workspace Packages
+
+**@thinkix/ui** (`packages/ui/`)
+- Shared React components built on shadcn/ui patterns
+- Exports: Button, Tooltip, Separator, Toggle, ToggleGroup, DropdownMenu, ImageViewer
+- Utilities: `cn()` class merge function
+- Import: `import { Button } from '@thinkix/ui';`
+
+**@thinkix/ai** (`packages/ai/`)
+- Vercel AI SDK integration with multi-provider support
+- Exports: `MODELS`, `createAIProvider()`, `executeCommand()`
+- Types: `AIProvider`, `AIModel`, `UserSettings`, `CanvasCommand`
+- Import: `import { MODELS, createAIProvider } from '@thinkix/ai';`
+
+**@thinkix/plait-utils** (`packages/plait-utils/`)
+- Helper functions for Plait board operations
+- Exports: `getSelectedMindElements()`, `getCanvasContext()`, `findElementById()`
+- Import: `import { getCanvasContext } from '@thinkix/plait-utils';`
 
 ## Architecture
 
@@ -39,13 +75,15 @@ features/
 ├── toolbar/                  # Toolbar UI
 │   └── components/
 │       └── BoardToolbar.tsx  # Tool selection and actions
-│
+
 shared/                       # Shared types and constants
 ├── types/                    # TypeScript types
 └── constants/                # Tool mappings
 
-components/ui/                # Shadcn-style components
-app/                          # Next.js app router
+app/                          # Next.js app router and API routes
+├── api/
+│   ├── chat/                # AI chat streaming endpoint
+│   └── structure/           # Content-to-mindmap structure endpoint
 ```
 
 ### Plait Integration
@@ -145,3 +183,62 @@ Custom plugins use an `add*` naming pattern indicating what capability they add:
 - Use feature-based organization for scalability
 - Export types from shared/ for reusability
 - Prefer early returns: `if (!board) return null;`
+
+## Adding New Workspace Packages
+
+To create a new workspace package:
+
+1. Create the package directory:
+   ```bash
+   mkdir -p packages/new-package/lib
+   ```
+
+2. Create `package.json`:
+   ```json
+   {
+     "name": "@thinkix/new-package",
+     "version": "0.0.1",
+     "private": true,
+     "type": "module",
+     "main": "./lib/index.ts",
+     "types": "./lib/index.d.ts",
+     "exports": {
+       ".": "./lib/index.ts"
+     },
+     "scripts": {
+       "typecheck": "tsc --noEmit"
+     },
+     "dependencies": {},
+     "devDependencies": {
+       "typescript": "^5"
+     }
+   }
+   ```
+
+3. Create `tsconfig.json`:
+   ```json
+   {
+     "extends": "../../tsconfig.json",
+     "compilerOptions": {
+       "composite": true,
+       "outDir": "./dist",
+       "rootDir": "./lib"
+     },
+     "include": ["lib/**/*"],
+     "references": []
+   }
+   ```
+
+4. Add reference to root `tsconfig.json`:
+   ```json
+   "references": [
+     { "path": "./packages/new-package" }
+   ]
+   ```
+
+5. Run `yarn install` to link the workspace package
+
+6. Import from anywhere in the app:
+   ```ts
+   import { something } from '@thinkix/new-package';
+   ```
