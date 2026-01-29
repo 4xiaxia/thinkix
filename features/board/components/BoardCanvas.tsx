@@ -13,13 +13,14 @@ import {
   withHistory,
   withHotkey,
 } from '@plait/core';
-import { withGroup } from '@plait/common';
+import { withGroup, withText } from '@plait/common';
 import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors } from '@plait/mind';
 import { addImageRenderer } from '../plugins/add-image-renderer';
 import { addEmojiRenderer } from '../plugins/add-emoji-renderer';
 import { addPenMode } from '../plugins/add-pen-mode';
 import { addImageInteractions } from '../plugins/add-image-interactions';
+import { addTextRenderer } from '../plugins/add-text-renderer';
 import { withScribble } from '../plugins/scribble';
 import { useBoardState } from '../hooks/use-board-state';
 
@@ -53,6 +54,8 @@ export function BoardCanvas({
 
   const plugins: PlaitPlugin[] = [
     addImageRenderer,
+    withText,
+    addTextRenderer as unknown as PlaitPlugin,
     withSelection,
     withDraw,
     withGroup,
