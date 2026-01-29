@@ -26,20 +26,11 @@
       "@/*": [
         "./*"
       ],
-      "@/components/*": [
-        "./components/*"
-      ],
       "@/features/*": [
         "./features/*"
       ],
       "@/shared/*": [
         "./shared/*"
-      ],
-      "@/hooks/*": [
-        "./hooks/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
       ]
     }
   },
