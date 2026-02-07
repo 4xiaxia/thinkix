@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Thinkix
+
+An AI-powered infinite canvas whiteboard for visual thinking. Create mind maps, draw freehand, add shapes, and let AI help organize your thoughts.
+
+## Features
+
+- **Infinite Canvas** - Pan, zoom, and explore without limits
+- **Mind Maps** - Create structured diagrams with the mind map tool
+- **Freehand Drawing** - Sketch ideas with the pen tool
+- **Shapes & Text** - Add rectangles, ellipses, diamonds, and text elements
+- **Images** - Drag, drop, or paste images with an integrated viewer
+- **AI Assistant** - Chat with AI to organize and structure your thinking (BYOK - Bring Your Own Key)
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (React 19, Turbopack)
+- **Canvas:** [Plait Board](https://github.com/plait-board) - Infinite whiteboard engine
+- **AI:** Vercel AI SDK (OpenAI, Anthropic support)
+- **UI:** shadcn/ui components with Tailwind CSS v4
+- **Monorepo:** Bun workspaces with shared packages
+- **Runtime:** Bun for package management and execution
+
+## Project Structure
+
+```
+thinkix/
+├── app/                    # Next.js app router & API routes
+│   ├── api/
+│   │   ├── chat/          # AI chat streaming endpoint
+│   │   └── structure/     # Content-to-mindmap endpoint
+│   └── ...
+├── packages/              # Workspace packages
+│   ├── ui/               # @thinkix/ui - Shared UI components
+│   ├── ai/               # @thinkix/ai - AI SDK integration
+│   └── plait-utils/      # @thinkix/plait-utils - Board helpers
+├── features/             # Feature modules
+│   ├── board/            # Canvas, state, plugins
+│   └── toolbar/          # Toolbar UI
+└── shared/               # Shared types & constants
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+Install [Bun](https://bun.sh):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+curl -fsSL https://bun.sh/install | bash
+```
+
+### Installation
+
+```bash
+bun install
+```
+
+### Development
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+bun run build
+bun start
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+### Tools
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Tool | Shortcut | Description |
+|------|----------|-------------|
+| Select | V | Select and move elements |
+| Pan | H | Pan around the canvas |
+| Mind Map | - | Create mind map diagrams |
+| Freehand | - | Draw with pen/pencil |
+| Shapes | - | Add rectangles, ellipses, diamonds, etc. |
+| Text | T | Add text elements |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### AI Features
 
-## Deploy on Vercel
+Thinkix supports AI-powered assistance through a Bring-Your-Own-Key (BYOK) model:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Chat** - Stream responses from OpenAI (GPT-4o) or Anthropic (Claude)
+2. **Structure** - Convert unstructured content into mind map JSON
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To use AI features, provide your API key when prompted, or set environment variables:
+
+```bash
+OPENAI_API_KEY=sk-...    # For GPT-4o
+ANTHROPIC_API_KEY=sk-... # For Claude
+```
+
+## Workspace Packages
+
+### `@thinkix/ui`
+Shared React components built on shadcn/ui patterns.
+
+```tsx
+import { Button, Tooltip } from '@thinkix/ui';
+```
+
+### `@thinkix/ai`
+AI SDK integration with multi-provider support.
+
+```ts
+import { MODELS, createAIProvider, executeCommand } from '@thinkix/ai';
+```
+
+### `@thinkix/plait-utils`
+Helper functions for Plait board operations.
+
+```ts
+import { getCanvasContext, findElementById } from '@thinkix/plait-utils';
+```
+
+## Keyboard Shortcuts
+
+- `Cmd/Ctrl + Z` - Undo
+- `Cmd/Ctrl + Shift + Z` - Redo
+- `Delete/Backspace` - Delete selected elements
+- `Escape` - Exit pen mode or close image viewer
+
+## License
+
+MIT
