@@ -87,7 +87,7 @@ bun start
 
 Thinkix supports AI-powered assistance through a Bring-Your-Own-Key (BYOK) model:
 
-1. **Chat** - Stream responses from OpenAI (GPT-4o) or Anthropic (Claude)
+1. **Chat** - Stream responses from OpenAI or Anthropic (Claude)
 2. **Structure** - Convert unstructured content into mind map JSON
 
 To use AI features, provide your API key when prompted, or set environment variables:
