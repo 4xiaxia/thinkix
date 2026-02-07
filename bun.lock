@@ -22,9 +22,10 @@
         "next": "16.1.1",
         "react": "19.2.3",
         "react-dom": "19.2.3",
-        "slate": "^0.120.0",
-        "slate-dom": "^0.119.0",
-        "slate-react": "^0.120.0",
+        "slate": "^0.116.0",
+        "slate-dom": "^0.116.0",
+        "slate-history": "^0.115.0",
+        "slate-react": "^0.116.0",
       },
       "devDependencies": {
         "@tailwindcss/postcss": "^4",
@@ -242,7 +243,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }],
 
-    "@juggle/resize-observer": ["@juggle/resize-observer@https://registry.npmjs.org/@juggle/resize-observer/-/resize-observer-3.4.0.tgz", {}],
+    "@juggle/resize-observer": ["@juggle/resize-observer@3.4.0", "", {}, "sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.4.tgz", { "dependencies": { "@emnapi/core": "^1.1.0", "@emnapi/runtime": "^1.1.0", "@tybys/wasm-util": "^0.9.0" } }],
 
@@ -602,7 +603,7 @@
 
     "combined-stream": ["combined-stream@https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz", { "dependencies": { "delayed-stream": "~1.0.0" } }],
 
-    "compute-scroll-into-view": ["compute-scroll-into-view@https://registry.npmjs.org/compute-scroll-into-view/-/compute-scroll-into-view-3.1.1.tgz", {}],
+    "compute-scroll-into-view": ["compute-scroll-into-view@3.1.1", "", {}, "sha512-VRhuHOLoKYOy4UbilLbUzbYg93XLjv2PncJC50EuTWPA3gaja1UjBsUP/D/9/juV3vQFr6XBEzn9KCAHdUvOHw=="],
 
     "concat-map": ["concat-map@https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz", {}],
 
@@ -644,7 +645,7 @@
 
     "diff-match-patch": ["diff-match-patch@1.0.5", "", {}, "sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw=="],
 
-    "direction": ["direction@https://registry.npmjs.org/direction/-/direction-1.0.4.tgz", {}],
+    "direction": ["direction@1.0.4", "", { "bin": { "direction": "cli.js" } }, "sha512-GYqKi1aH7PJXxdhTeZBFrg8vUBeKXi+cNprXsC1kpJcbcVnV9wBsrOu1cQEdG0WeQwlfHiy3XvnKfIrJ2R0NzQ=="],
 
     "doctrine": ["doctrine@https://registry.npmjs.org/doctrine/-/doctrine-2.1.0.tgz", { "dependencies": { "esutils": "^2.0.2" } }],
 
@@ -864,7 +865,7 @@
 
     "is-number-object": ["is-number-object@https://registry.npmjs.org/is-number-object/-/is-number-object-1.1.1.tgz", { "dependencies": { "call-bound": "^1.0.3", "has-tostringtag": "^1.0.2" } }],
 
-    "is-plain-object": ["is-plain-object@https://registry.npmjs.org/is-plain-object/-/is-plain-object-5.0.0.tgz", {}],
+    "is-plain-object": ["is-plain-object@5.0.0", "", {}, "sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q=="],
 
     "is-regex": ["is-regex@https://registry.npmjs.org/is-regex/-/is-regex-1.2.1.tgz", { "dependencies": { "call-bound": "^1.0.2", "gopd": "^1.2.0", "has-tostringtag": "^1.0.2", "hasown": "^2.0.2" } }],
 
@@ -958,7 +959,7 @@
 
     "locate-path": ["locate-path@https://registry.npmjs.org/locate-path/-/locate-path-6.0.0.tgz", { "dependencies": { "p-locate": "^5.0.0" } }],
 
-    "lodash": ["lodash@https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz", {}],
+    "lodash": ["lodash@4.17.23", "", {}, "sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w=="],
 
     "lodash.merge": ["lodash.merge@https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz", {}],
 
@@ -1124,7 +1125,7 @@
 
     "screenfull": ["screenfull@https://registry.npmjs.org/screenfull/-/screenfull-5.2.0.tgz", {}],
 
-    "scroll-into-view-if-needed": ["scroll-into-view-if-needed@https://registry.npmjs.org/scroll-into-view-if-needed/-/scroll-into-view-if-needed-3.1.0.tgz", { "dependencies": { "compute-scroll-into-view": "^3.0.2" } }],
+    "scroll-into-view-if-needed": ["scroll-into-view-if-needed@3.1.0", "", { "dependencies": { "compute-scroll-into-view": "^3.0.2" } }, "sha512-49oNpRjWRvnU8NyGVmUaYG4jtTkNonFZI86MmGRDqBphEK2EXT9gdEUoQPZhuBM8yWHxCWbobltqYO5M4XrUvQ=="],
 
     "secure-json-parse": ["secure-json-parse@2.7.0", "", {}, "sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw=="],
 
@@ -1152,13 +1153,13 @@
 
     "signal-exit": ["signal-exit@https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.7.tgz", {}],
 
-    "slate": ["slate@https://registry.npmjs.org/slate/-/slate-0.120.0.tgz", {}],
+    "slate": ["slate@0.116.0", "", { "dependencies": { "immer": "^10.0.3", "tiny-warning": "^1.0.3" } }, "sha512-CpI6S0PTFDjFsYKah3geR7X5O/38tjxVlwkYGpfQ583yYkSbt/pyEldTB1CJE3MK4htfn2D/wPkwWtDV06ZqWA=="],
 
-    "slate-dom": ["slate-dom@https://registry.npmjs.org/slate-dom/-/slate-dom-0.119.0.tgz", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "is-plain-object": "^5.0.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" } }],
+    "slate-dom": ["slate-dom@0.116.0", "", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "is-plain-object": "^5.0.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" }, "peerDependencies": { "slate": ">=0.99.0" } }, "sha512-ZyyPdT4zY4d/P/gfqMWBaAWWqV3N2BbAiDqEfOtZwPLcy7vvC02PsVvSZLaGun7DvaM2EIqdN7tTq3REbQkYgA=="],
 
-    "slate-history": ["slate-history@https://registry.npmjs.org/slate-history/-/slate-history-0.115.0.tgz", {}],
+    "slate-history": ["slate-history@0.115.0", "", { "peerDependencies": { "slate": ">=0.114.3" } }, "sha512-QdUm9aVyQFz6JG4a84Z6Um+tJpZJmsh9bjXwTVTvYiN4rdKbqL6+/4HT94on1WYxe10Q4vY6mA6BCpoYxgF3tQ=="],
 
-    "slate-react": ["slate-react@https://registry.npmjs.org/slate-react/-/slate-react-0.120.0.tgz", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" } }],
+    "slate-react": ["slate-react@0.116.0", "", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" }, "peerDependencies": { "react": ">=18.2.0", "react-dom": ">=18.2.0", "slate": ">=0.114.0", "slate-dom": ">=0.116.0" } }, "sha512-wyM41C/qnzfovqOWnjReM5aojLlGxogL/yzMg+ZaZIdEERSJTKjpgt0iIxy4pdIu5GQkF3mwFNNc1/Zy+C/Uwg=="],
 
     "source-map-js": ["source-map-js@https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz", {}],
 
@@ -1208,9 +1209,9 @@
 
     "throttleit": ["throttleit@2.1.0", "", {}, "sha512-nt6AMGKW1p/70DF/hGBdJB57B8Tspmbp5gfJ8ilhLnt7kkr2ye7hzD6NVG8GGErk2HWF34igrL2CXmNIkzKqKw=="],
 
-    "tiny-invariant": ["tiny-invariant@https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.3.1.tgz", {}],
+    "tiny-invariant": ["tiny-invariant@1.3.1", "", {}, "sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw=="],
 
-    "tiny-warning": ["tiny-warning@https://registry.npmjs.org/tiny-warning/-/tiny-warning-1.0.3.tgz", {}],
+    "tiny-warning": ["tiny-warning@1.0.3", "", {}, "sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA=="],
 
     "tinyglobby": ["tinyglobby@https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.15.tgz", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.3" } }],
 
@@ -1312,6 +1313,8 @@
 
     "@plait-board/react-text/slate-dom": ["slate-dom@https://registry.npmjs.org/slate-dom/-/slate-dom-0.116.0.tgz", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "is-plain-object": "^5.0.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" } }],
 
+    "@plait-board/react-text/slate-history": ["slate-history@https://registry.npmjs.org/slate-history/-/slate-history-0.115.0.tgz", {}],
+
     "@plait-board/react-text/slate-react": ["slate-react@https://registry.npmjs.org/slate-react/-/slate-react-0.116.0.tgz", { "dependencies": { "@juggle/resize-observer": "^3.4.0", "direction": "^1.0.4", "is-hotkey": "^0.2.0", "lodash": "^4.17.21", "scroll-into-view-if-needed": "^3.1.0", "tiny-invariant": "1.3.1" } }],
 
     "@radix-ui/react-collection/@radix-ui/react-slot": ["@radix-ui/react-slot@1.2.3", "", { "dependencies": { "@radix-ui/react-compose-refs": "1.1.2" }, "peerDependencies": { "@types/react": "*", "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-aeNmHnBxbi2St0au6VBVC7JXFlhLlOnvIIlePNniyUNAClzmtAUEY8/pBiK3iHjufOlwA+c20/8jngo7xcrg8A=="],
@@ -1360,6 +1363,8 @@
 
     "@yarnpkg/parsers/js-yaml": ["js-yaml@https://registry.npmjs.org/js-yaml/-/js-yaml-3.14.2.tgz", { "dependencies": { "argparse": "^1.0.7", "esprima": "^4.0.0" } }],
 
+    "ahooks/lodash": ["lodash@https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz", {}],
+
     "aria-hidden/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
     "eslint-import-resolver-node/debug": ["debug@https://registry.npmjs.org/debug/-/debug-3.2.7.tgz", { "dependencies": { "ms": "^2.1.1" } }],
@@ -1406,11 +1411,41 @@
 
     "roughjs/points-on-curve": ["points-on-curve@https://registry.npmjs.org/points-on-curve/-/points-on-curve-0.2.0.tgz", {}],
 
+    "slate/immer": ["immer@10.2.0", "", {}, "sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw=="],
+
+    "slate-dom/is-hotkey": ["is-hotkey@0.2.0", "", {}, "sha512-UknnZK4RakDmTgz4PI1wIph5yxSs/mvChWs9ifnlXsKuXgWmOkY/hAE0H/k2MIqH0RlRye0i1oC07MCRSD28Mw=="],
+
+    "slate-react/is-hotkey": ["is-hotkey@0.2.0", "", {}, "sha512-UknnZK4RakDmTgz4PI1wIph5yxSs/mvChWs9ifnlXsKuXgWmOkY/hAE0H/k2MIqH0RlRye0i1oC07MCRSD28Mw=="],
+
     "string-width/emoji-regex": ["emoji-regex@https://registry.npmjs.org/emoji-regex/-/emoji-regex-8.0.0.tgz", {}],
 
     "use-callback-ref/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
     "use-sidecar/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
+
+    "@plait-board/react-text/slate/tiny-warning": ["tiny-warning@https://registry.npmjs.org/tiny-warning/-/tiny-warning-1.0.3.tgz", {}],
+
+    "@plait-board/react-text/slate-dom/@juggle/resize-observer": ["@juggle/resize-observer@https://registry.npmjs.org/@juggle/resize-observer/-/resize-observer-3.4.0.tgz", {}],
+
+    "@plait-board/react-text/slate-dom/direction": ["direction@https://registry.npmjs.org/direction/-/direction-1.0.4.tgz", {}],
+
+    "@plait-board/react-text/slate-dom/is-plain-object": ["is-plain-object@https://registry.npmjs.org/is-plain-object/-/is-plain-object-5.0.0.tgz", {}],
+
+    "@plait-board/react-text/slate-dom/lodash": ["lodash@https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz", {}],
+
+    "@plait-board/react-text/slate-dom/scroll-into-view-if-needed": ["scroll-into-view-if-needed@https://registry.npmjs.org/scroll-into-view-if-needed/-/scroll-into-view-if-needed-3.1.0.tgz", { "dependencies": { "compute-scroll-into-view": "^3.0.2" } }],
+
+    "@plait-board/react-text/slate-dom/tiny-invariant": ["tiny-invariant@https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.3.1.tgz", {}],
+
+    "@plait-board/react-text/slate-react/@juggle/resize-observer": ["@juggle/resize-observer@https://registry.npmjs.org/@juggle/resize-observer/-/resize-observer-3.4.0.tgz", {}],
+
+    "@plait-board/react-text/slate-react/direction": ["direction@https://registry.npmjs.org/direction/-/direction-1.0.4.tgz", {}],
+
+    "@plait-board/react-text/slate-react/lodash": ["lodash@https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz", {}],
+
+    "@plait-board/react-text/slate-react/scroll-into-view-if-needed": ["scroll-into-view-if-needed@https://registry.npmjs.org/scroll-into-view-if-needed/-/scroll-into-view-if-needed-3.1.0.tgz", { "dependencies": { "compute-scroll-into-view": "^3.0.2" } }],
+
+    "@plait-board/react-text/slate-react/tiny-invariant": ["tiny-invariant@https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.3.1.tgz", {}],
 
     "@thinkix/plait-utils/@plait/common/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
@@ -1503,6 +1538,10 @@
     "eslint-plugin-import/tsconfig-paths/json5": ["json5@https://registry.npmjs.org/json5/-/json5-1.0.2.tgz", { "dependencies": { "minimist": "^1.2.0" } }],
 
     "front-matter/js-yaml/argparse": ["argparse@https://registry.npmjs.org/argparse/-/argparse-1.0.10.tgz", { "dependencies": { "sprintf-js": "~1.0.2" } }],
+
+    "@plait-board/react-text/slate-dom/scroll-into-view-if-needed/compute-scroll-into-view": ["compute-scroll-into-view@https://registry.npmjs.org/compute-scroll-into-view/-/compute-scroll-into-view-3.1.1.tgz", {}],
+
+    "@plait-board/react-text/slate-react/scroll-into-view-if-needed/compute-scroll-into-view": ["compute-scroll-into-view@https://registry.npmjs.org/compute-scroll-into-view/-/compute-scroll-into-view-3.1.1.tgz", {}],
 
     "@thinkix/plait-utils/@plait/core/roughjs/hachure-fill": ["hachure-fill@0.5.2", "", {}, "sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg=="],
 
