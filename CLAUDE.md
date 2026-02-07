@@ -9,16 +9,18 @@ Thinkix is an infinite canvas whiteboard application built with Next.js 16, Reac
 ## Development Commands
 
 ```bash
-yarn dev      # Start development server (Turbopack, http://localhost:3000)
-yarn build    # Build for production
-yarn start    # Start production server
-yarn lint     # Run ESLint
-yarn install  # Install workspace dependencies
+bun dev       # Start development server (Turbopack, http://localhost:3000)
+bun run build # Build for production
+bun start     # Start production server
+bun run lint  # Run ESLint
+bun install   # Install workspace dependencies
 ```
+
+**Note:** This project uses Bun as the package manager and runtime. Install Bun from [bun.sh](https://bun.sh).
 
 ## Monorepo Structure
 
-The project uses Yarn workspaces with the following structure:
+The project uses Bun workspaces with the following structure:
 
 ```
 thinkix/
@@ -236,7 +238,7 @@ To create a new workspace package:
    ]
    ```
 
-5. Run `yarn install` to link the workspace package
+5. Run `bun install` to link the workspace package
 
 6. Import from anywhere in the app:
    ```ts

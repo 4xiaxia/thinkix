@@ -1,1 +1,5 @@
-22.11.0
+# Thinkix uses Bun as package manager and runtime
+# Install Bun from: https://bun.sh
+#
+# After installing Bun, no Node version management needed
+# Bun includes its own runtime and package manager
