@@ -1,9 +1,12 @@
 import type { DrawingTool } from './tools';
 import type { PlaitBoard } from '@plait/core';
+import type { SaveStatus } from '@thinkix/storage';
 
 export interface BoardState {
   activeTool: DrawingTool;
   zoom: number;
+  currentBoardId: string | null;
+  saveStatus: SaveStatus;
 }
 
 export interface BoardContextValue {
@@ -12,4 +15,6 @@ export interface BoardContextValue {
   state: BoardState;
   setState: React.Dispatch<React.SetStateAction<BoardState>>;
   setActiveTool: (tool: DrawingTool) => void;
+  setCurrentBoardId: (id: string | null) => void;
+  setSaveStatus: (status: SaveStatus) => void;
 }
