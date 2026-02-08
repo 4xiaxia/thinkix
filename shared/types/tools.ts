@@ -23,9 +23,6 @@ export type ToolCategory = 'selection' | 'navigation' | 'drawing' | 'shapes' | '
 
 export interface ToolConfig {
   id: DrawingTool;
-  category: ToolCategory;
-  label: string;
   icon: React.ReactNode;
-  pointerType: string;
-  isDrawingTool: boolean;
+  label: string;
 }
