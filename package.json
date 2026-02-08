@@ -15,7 +15,6 @@
     "@ai-sdk/anthropic": "^1.2.0",
     "@ai-sdk/openai": "^1.2.0",
     "@ai-sdk/react": "^1.1.0",
-    "ai": "^4.0.0",
     "@plait-board/react-board": "0.4.0-2",
     "@plait-board/react-text": "^0.4.0-0",
     "@plait/common": "^0.92.1",
@@ -23,6 +22,9 @@
     "@plait/draw": "^0.92.1",
     "@plait/mind": "^0.92.1",
     "@plait/text": "^0.60.4",
+    "ai": "^4.0.0",
+    "dexie": "^4.3.0",
+    "idb": "^8.0.0",
     "immer": "^10.0.4",
     "is-hotkey": "^0.2.0",
     "lucide-react": "^0.562.0",
@@ -31,8 +33,10 @@
     "react-dom": "19.2.3",
     "slate": "^0.116.0",
     "slate-dom": "^0.116.0",
+    "slate-history": "^0.115.0",
     "slate-react": "^0.116.0",
-    "slate-history": "^0.115.0"
+    "sonner": "^2.0.7",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
