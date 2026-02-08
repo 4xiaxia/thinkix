@@ -1,0 +1,22 @@
+{
+  "name": "@thinkix/storage",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./lib/index.ts",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.ts",
+    "./types": "./lib/types.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "idb": "^8.0.0"
+  },
+  "devDependencies": {
+    "@plait/core": "^0.92.1",
+    "typescript": "^5"
+  }
+}
