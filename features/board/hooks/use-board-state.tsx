@@ -9,8 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { PlaitBoard } from '@plait/core';
-import { PlaitPointerType, BoardTransforms } from '@plait/core';
+import { PlaitPointerType, BoardTransforms, type PlaitBoard } from '@plait/core';
 import { BoardCreationMode, setCreationMode, selectImage } from '@plait/common';
 import { DrawTransforms } from '@plait/draw';
 import {
@@ -21,7 +20,9 @@ import {
 import type { BoardState, BoardContextValue, DrawingTool } from '@/shared/types';
 import type { SaveStatus } from '@thinkix/storage';
 
-const BoardContext = createContext<BoardContextValue | null>(null);
+type BoardContextValueTyped = BoardContextValue<PlaitBoard>;
+
+const BoardContext = createContext<BoardContextValueTyped | null>(null);
 
 interface BoardProviderProps {
   children: ReactNode;
@@ -95,7 +96,7 @@ export function BoardProvider({ children }: BoardProviderProps) {
 }
 
 
-export function useBoardState(): BoardContextValue {
+export function useBoardState(): BoardContextValueTyped {
   const context = useContext(BoardContext);
   if (!context) {
     throw new Error('useBoardState must be used within BoardProvider');
