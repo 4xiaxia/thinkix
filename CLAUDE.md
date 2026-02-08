@@ -70,6 +70,7 @@ features/
 │       ├── add-mind-node-resize.ts   # Width resize handles for mind nodes
 │       ├── add-pen-mode.ts           # Stylus/pencil detection
 │       ├── add-image-interactions.ts # Drag-drop, paste, view images
+│       ├── add-text-renderer.tsx     # Custom Slate-based text editor
 │       ├── image-component.tsx       # React image component
 │       ├── emoji-component.tsx       # React emoji component
 │       └── scribble/                 # Freehand drawing plugin
@@ -94,6 +95,8 @@ The board uses `@plait-board/react-board@0.4.0-2` with Plait 0.92.1 packages:
 
 **Plugins** (BoardCanvas.tsx, in order):
 - `addImageRenderer` - Custom: provides `renderImage` for image display
+- `withText` - Text editing support from `@plait/common`
+- `addTextRenderer` - Custom: Slate-based text editor with auto-resize
 - `withSelection` - Element selection
 - `withDraw` - Drawing primitives
 - `withGroup` - Grouping support
@@ -116,6 +119,30 @@ rectangle → rectangle
 ellipse   → ellipse
 ... etc
 ```
+
+### Custom Text Renderer
+
+**IMPORTANT**: The project uses a custom Slate-based text renderer (`features/board/plugins/add-text-renderer.tsx`) instead of `@plait-board/react-text`.
+
+**Why custom?**
+- Fixes text typing persistence issue (React 19 + root.render() incompatibility)
+- Removes default Chinese text ("文本") on new text elements
+- Provides full control over editor lifecycle and state management
+
+**How it works:**
+- Creates a persistent Slate editor instance via `useMemo(() => withHistory(withReact(createEditor())), [])`
+- Uses local update tracking to prevent external prop changes from overwriting user typing
+- Normalizes null/invalid text values to prevent Slate errors
+- Replaces "文本" with empty string for new text elements
+
+**Text element properties:**
+- `autoSize: true` - Elements automatically resize to fit text content
+- Text elements use Slate JSON format: `{ children: [{ text: 'content' }] }`
+
+**If modifying text rendering:**
+- The `onChange` callback must include `newText` and `operations`
+- Editor instance must persist across renders (empty deps in useMemo)
+- Local update flag prevents infinite loops during external prop updates
 
 ### Important Configuration
 
@@ -140,6 +167,12 @@ ellipse   → ellipse
 ### Custom Plugins
 
 Custom plugins use an `add*` naming pattern indicating what capability they add:
+
+**addTextRenderer** (features/board/plugins/add-text-renderer.tsx):
+- Custom Slate-based text editor implementation
+- Provides `board.renderText()` for text element rendering
+- Handles text normalization (null values, Chinese default text)
+- Manages editor state persistence across React re-renders
 
 **addImageRenderer** (features/board/plugins/add-image-renderer.tsx):
 - Provides `board.renderImage()` for React-based image rendering
@@ -244,3 +277,14 @@ To create a new workspace package:
    ```ts
    import { something } from '@thinkix/new-package';
    ```
+
+## Known Issues & Solutions
+
+### Text Editor with Slate
+- **Issue**: React 19's `root.render()` can reset component state, causing text to be lost
+- **Solution**: Custom text renderer with persistent editor instance and local update tracking
+- **Do NOT**: Switch to `@plait-board/react-text` or attempt to use Lexical (deeply integrated with Slate)
+
+### Default Chinese Text
+- **Issue**: New text elements show "文本" (Chinese for "text")
+- **Solution**: `normalizeTextValue()` function replaces with empty string
