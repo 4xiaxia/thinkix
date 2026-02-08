@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Board, Wrapper, type BoardChangeData } from '@plait-board/react-board';
 import {
   type PlaitElement,
@@ -15,7 +15,7 @@ import {
 } from '@plait/core';
 import { withGroup, withText } from '@plait/common';
 import { withDraw } from '@plait/draw';
-import { withMind, MindThemeColors } from '@plait/mind';
+import { withMind, MindThemeColors, PlaitMind } from '@plait/mind';
 import { addImageRenderer } from '../plugins/add-image-renderer';
 import { addEmojiRenderer } from '../plugins/add-emoji-renderer';
 import { addPenMode } from '../plugins/add-pen-mode';
@@ -23,6 +23,8 @@ import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
 import { withScribble } from '../plugins/scribble';
 import { useBoardState } from '../hooks/use-board-state';
+import { useAutoSave } from '@/features/storage';
+import type { Board as StorageBoard } from '@thinkix/storage';
 
 import '@/app/styles/plait-react-board.css';
 
@@ -30,6 +32,7 @@ export interface BoardCanvasProps {
   initialValue?: PlaitElement[];
   className?: string;
   children?: ReactNode;
+  boardData?: StorageBoard | null;
 }
 
 const DEFAULT_BOARD_OPTIONS: PlaitBoardOptions = {
@@ -48,8 +51,9 @@ export function BoardCanvas({
   initialValue = [],
   className,
   children,
+  boardData,
 }: BoardCanvasProps) {
-  const { setBoard } = useBoardState();
+  const { board, setBoard, setCurrentBoardId } = useBoardState();
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
@@ -76,9 +80,22 @@ export function BoardCanvas({
     setBoard(board);
   };
 
+  useEffect(() => {
+    if (boardData) {
+      setValue(boardData.elements);
+      setCurrentBoardId(boardData.id);
+    }
+  }, [boardData, setCurrentBoardId]);
+
+  useAutoSave({
+    board: board,
+    enabled: !!boardData,
+  });
+
   return (
     <div className={`relative w-full h-full ${className || ''}`}>
       <Wrapper
+        key={boardData?.id ?? 'default'}
         value={value}
         options={DEFAULT_BOARD_OPTIONS}
         plugins={plugins}

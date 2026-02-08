@@ -171,8 +171,10 @@ export function addTextRenderer(board: PlaitTextBoard) {
         root.render(<TextComponent {...newProps} />);
       },
       destroy: () => {
-        root.unmount();
-        componentMap.delete(id);
+        Promise.resolve().then(() => {
+          root.unmount();
+          componentMap.delete(id);
+        });
       }
     };
   };

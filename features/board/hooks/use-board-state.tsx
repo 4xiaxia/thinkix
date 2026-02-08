@@ -19,6 +19,7 @@ import {
   DEFAULT_TOOL,
 } from '@/shared/constants';
 import type { BoardState, BoardContextValue, DrawingTool } from '@/shared/types';
+import type { SaveStatus } from '@thinkix/storage';
 
 const BoardContext = createContext<BoardContextValue | null>(null);
 
@@ -32,6 +33,8 @@ export function BoardProvider({ children }: BoardProviderProps) {
   const [state, setState] = useState<BoardState>({
     activeTool: DEFAULT_TOOL,
     zoom: 100,
+    currentBoardId: null,
+    saveStatus: 'idle',
   });
 
   const boardRef = useRef<PlaitBoard | null>(null);
@@ -65,6 +68,14 @@ export function BoardProvider({ children }: BoardProviderProps) {
     []
   );
 
+  const setCurrentBoardId = useCallback((id: string | null) => {
+    setState((prev) => ({ ...prev, currentBoardId: id }));
+  }, []);
+
+  const setSaveStatus = useCallback((status: SaveStatus) => {
+    setState((prev) => ({ ...prev, saveStatus: status }));
+  }, []);
+
   const value = useMemo<BoardContextValue>(
     () => ({
       board,
@@ -72,8 +83,10 @@ export function BoardProvider({ children }: BoardProviderProps) {
       state,
       setState,
       setActiveTool,
+      setCurrentBoardId,
+      setSaveStatus,
     }),
-    [board, state, setActiveTool]
+    [board, state, setActiveTool, setCurrentBoardId, setSaveStatus]
   );
 
   return (
