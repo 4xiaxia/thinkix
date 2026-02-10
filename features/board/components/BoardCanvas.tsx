@@ -18,6 +18,7 @@ import { withDraw } from '@plait/draw';
 import { withMind, MindThemeColors, PlaitMind } from '@plait/mind';
 import { addImageRenderer } from '../plugins/add-image-renderer';
 import { addEmojiRenderer } from '../plugins/add-emoji-renderer';
+import { addMindNodeResize } from '../plugins/add-mind-node-resize';
 import { addPenMode } from '../plugins/add-pen-mode';
 import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
@@ -66,6 +67,7 @@ export function BoardCanvas({
     withGroup,
     withMind,
     addEmojiRenderer,
+    addMindNodeResize as unknown as PlaitPlugin,
     withHistory,
     withHotkey,
     addPenMode,

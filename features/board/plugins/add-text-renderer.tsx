@@ -1,7 +1,7 @@
 'use client';
 
 import { createRoot } from 'react-dom/client';
-import type { PlaitTextBoard } from '@plait/common';
+import type { PlaitTextBoard, PlaitTextElement } from '@plait/common';
 import type { Element as SlateElement, Descendant } from 'slate';
 import { createEditor, type Editor } from 'slate';
 import { withReact } from 'slate-react';
@@ -11,6 +11,8 @@ import { useCallback, useMemo, useEffect, useState } from 'react';
 import { isKeyHotkey } from 'is-hotkey';
 import { Transforms, Range, Node } from 'slate';
 import type { CustomElement, CustomText } from '@plait/common';
+import { Transforms as PlaitTransforms, Path } from '@plait/core';
+import { PlaitBoard } from '@plait/core';
 
 type ParagraphElement = CustomElement & { align?: 'left' | 'center' | 'right' };
 
@@ -20,6 +22,9 @@ interface TextWrapperProps {
   onChange?: (data: { newText: SlateElement; operations: any[] }) => void;
   afterInit?: (editor: Editor) => void;
   onComposition?: (event: CompositionEvent) => void;
+  element?: PlaitTextElement;
+  path?: Path;
+  board?: PlaitBoard;
 }
 
 const DEFAULT_CHINESE_TEXT = '文本';
@@ -86,7 +91,7 @@ const Element = (props: any) => {
   );
 };
 
-function TextComponent({ text: textProp, readonly, onChange, afterInit, onComposition }: TextWrapperProps) {
+function TextComponent({ text: textProp, readonly, onChange, afterInit, onComposition, board, element, path }: TextWrapperProps) {
   const editor = useMemo(() => {
     const e = withHistory(withReact(createEditor()));
     afterInit?.(e);
@@ -112,8 +117,27 @@ function TextComponent({ text: textProp, readonly, onChange, afterInit, onCompos
 
   const handleChange = (value: Descendant[]) => {
     setIsLocalUpdate(true);
+    const newText = editor.children[0] as SlateElement;
+
+    // Update the Plait element's text property to persist changes
+    if (element && path) {
+      PlaitTransforms.setNode(board, { text: newText }, path);
+    } else {
+      // Find the currently selected text element
+      const selection = (board as any).selection;
+      if (selection) {
+        for (const [path, selectedElement] of Array.from(selection.entries())) {
+          const el = selectedElement as PlaitTextElement;
+          if (el.type === 'text' || el.text === textProp) {
+            PlaitTransforms.setNode(board, { text: newText }, path);
+            break;
+          }
+        }
+      }
+    }
+
     onChange?.({
-      newText: editor.children[0] as SlateElement,
+      newText,
       operations: editor.operations
     });
   };
@@ -156,19 +180,21 @@ function TextComponent({ text: textProp, readonly, onChange, afterInit, onCompos
 
 const componentMap = new Map<string, { root: any; container: Element | DocumentFragment }>();
 let renderId = 0;
+let boardRef: PlaitTextBoard | null = null;
 
 export function addTextRenderer(board: PlaitTextBoard) {
+  boardRef = board;
   board.renderText = (container, props) => {
     const id = `${container}-${renderId++}`;
 
     const root = createRoot(container);
     componentMap.set(id, { root, container });
 
-    root.render(<TextComponent {...props} />);
+    root.render(<TextComponent {...props} board={boardRef as PlaitBoard} />);
 
     return {
       update: (newProps) => {
-        root.render(<TextComponent {...newProps} />);
+        root.render(<TextComponent {...newProps} board={boardRef as PlaitBoard} />);
       },
       destroy: () => {
         Promise.resolve().then(() => {
