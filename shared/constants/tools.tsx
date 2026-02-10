@@ -1,6 +1,5 @@
 import { PlaitPointerType } from '@plait/core';
-import type { DrawingTool, ToolCategory, ToolConfig } from '@/shared/types';
-import { MindMapIcon } from './icons';
+import type { DrawingTool, ToolConfig } from '@thinkix/shared';
 import {
   MousePointer2,
   Hand,
@@ -17,6 +16,7 @@ import {
   Star,
   Cloud,
 } from 'lucide-react';
+import { MindMapIcon } from './icons';
 
 export const TOOL_TO_POINTER: Record<DrawingTool, string> = {
   hand: PlaitPointerType.hand,
