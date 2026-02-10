@@ -17,7 +17,7 @@ import {
   DRAWING_TOOLS,
   DEFAULT_TOOL,
 } from '@/shared/constants';
-import type { BoardState, BoardContextValue, DrawingTool } from '@/shared/types';
+import type { BoardState, BoardContextValue, DrawingTool } from '@thinkix/shared';
 import type { SaveStatus } from '@thinkix/storage';
 
 type BoardContextValueTyped = BoardContextValue<PlaitBoard>;

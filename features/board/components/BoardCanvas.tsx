@@ -23,6 +23,7 @@ import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
 import { withScribble } from '../plugins/scribble';
 import { useBoardState } from '../hooks/use-board-state';
+import { InlineColorToolbar } from './InlineColorToolbar';
 import { useAutoSave } from '@/features/storage';
 import type { Board as StorageBoard } from '@thinkix/storage';
 
@@ -106,6 +107,7 @@ export function BoardCanvas({
           className="w-full h-full bg-background"
           afterInit={handleBoardInit}
         />
+        <InlineColorToolbar />
         {children}
       </Wrapper>
     </div>
