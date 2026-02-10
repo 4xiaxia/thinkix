@@ -8,6 +8,14 @@ export * from './components/ui/dropdown-menu';
 export * from './components/ui/image-viewer';
 export * from './components/ui/dialog';
 export * from './components/ui/input';
+export * from './components/ui/stack';
+export * from './components/ui/island';
+export * from './components/ui/floating-toolbar';
+export * from './components/ui/color-picker';
+export * from './components/ui/slider';
+export * from './components/ui/size-slider';
+export * from './components/ui/no-color-icon';
 
 // Utils
 export * from './lib/utils';
+export * from './lib/color';
