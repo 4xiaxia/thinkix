@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@thinkix/ui';
 import { useBoardState } from '@/features/board/hooks/use-board-state';
-import type { DrawingTool } from '@/shared/types';
+import type { DrawingTool } from '@thinkix/shared';
 import {
   SELECTION_TOOLS,
   NAVIGATION_TOOLS,
