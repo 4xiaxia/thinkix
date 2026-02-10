@@ -27,18 +27,20 @@ thinkix/
 ├── packages/              # Workspace packages
 │   ├── ui/               # @thinkix/ui - Shared UI components (shadcn-based)
 │   ├── ai/               # @thinkix/ai - AI SDK integration and utilities
-│   └── plait-utils/      # @thinkix/plait-utils - Plait board helpers
+│   ├── plait-utils/      # @thinkix/plait-utils - Plait board helpers
+│   ├── storage/          # @thinkix/storage - IndexedDB storage
+│   └── shared/           # @thinkix/shared - Shared types
 │
-├── features/             # Feature modules (board, toolbar, etc.)
+├── features/             # Feature modules (board, toolbar, storage, etc.)
 ├── app/                  # Next.js app router and API routes
-└── shared/               # Shared types and constants
+└── shared/               # Shared constants with JSX (icons, tool configs)
 ```
 
 ### Workspace Packages
 
 **@thinkix/ui** (`packages/ui/`)
 - Shared React components built on shadcn/ui patterns
-- Exports: Button, Tooltip, Separator, Toggle, ToggleGroup, DropdownMenu, ImageViewer
+- Exports: Button, Tooltip, Separator, Toggle, ToggleGroup, DropdownMenu, ImageViewer, Dialog, Input
 - Utilities: `cn()` class merge function
 - Import: `import { Button } from '@thinkix/ui';`
 
@@ -50,8 +52,44 @@ thinkix/
 
 **@thinkix/plait-utils** (`packages/plait-utils/`)
 - Helper functions for Plait board operations
-- Exports: `getSelectedMindElements()`, `getCanvasContext()`, `findElementById()`
+- Exports: `getSelectedElements()`, `getSelectedMindElements()`, `getCanvasContext()`, `findElementById()`
 - Import: `import { getCanvasContext } from '@thinkix/plait-utils';`
+
+**@thinkix/storage** (`packages/storage/`)
+- IndexedDB-based board storage with Dexie
+- Exports: `useBoardStore`, types: `Board`, `BoardMetadata`, `SaveStatus`
+- Import: `import { useBoardStore } from '@thinkix/storage';`
+
+**@thinkix/shared** (`packages/shared/`)
+- TypeScript types for the application
+- Exports: `DrawingTool`, `ToolConfig`, `BoardState`, `BoardContextValue`
+- Import: `import type { DrawingTool } from '@thinkix/shared';`
+
+### Shared Directory
+
+**Why two locations for shared code?**
+
+The monorepo uses a dual approach to avoid type duplication issues:
+
+| Location | Contains | Reason |
+|----------|----------|--------|
+| `packages/shared/` | **Types only** (no JSX) | Workspace package, import as `@thinkix/shared` |
+| `shared/constants/` | **JSX + constants** | App-level, import as `@/shared/constants` |
+
+**Why this split?**
+- TypeScript treats each package's `node_modules/@types/react` as separate types
+- JSX requires React types, creating duplicate type instances when in packages
+- Keeping JSX in `shared/` (not a package) avoids this issue
+- Types in `packages/shared/` can be safely imported across all workspace packages
+
+**Usage:**
+```typescript
+// Types (workspace package)
+import type { DrawingTool, BoardState } from '@thinkix/shared';
+
+// Constants with JSX (app-level)
+import { BASIC_TOOLS, TOOLBAR_ITEM_CLASS, MindMapIcon } from '@/shared/constants';
+```
 
 ## Architecture
 
@@ -221,62 +259,36 @@ Custom plugins use an `add*` naming pattern indicating what capability they add:
 
 ## Adding New Workspace Packages
 
-To create a new workspace package:
+When creating workspace packages, follow these guidelines:
 
-1. Create the package directory:
-   ```bash
-   mkdir -p packages/new-package/lib
-   ```
+### Types-Only Packages (preferred)
+For packages containing only TypeScript types (no JSX):
+```json
+{
+  "name": "@thinkix/types",
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
+```
+- Do NOT add `@types/react` as devDependency (causes duplicate type conflicts)
+- Use `peerDependencies` if the package requires React at runtime
+- Add `references` to other workspace packages if needed
 
-2. Create `package.json`:
-   ```json
-   {
-     "name": "@thinkix/new-package",
-     "version": "0.0.1",
-     "private": true,
-     "type": "module",
-     "main": "./lib/index.ts",
-     "types": "./lib/index.d.ts",
-     "exports": {
-       ".": "./lib/index.ts"
-     },
-     "scripts": {
-       "typecheck": "tsc --noEmit"
-     },
-     "dependencies": {},
-     "devDependencies": {
-       "typescript": "^5"
-     }
-   }
-   ```
+### Packages with JSX
+For packages containing React components (JSX):
+- Keep dependencies minimal
+- Use `peerDependencies` for React instead of regular dependencies
+- Avoid `@types/react` in devDependencies (comes from root)
 
-3. Create `tsconfig.json`:
-   ```json
-   {
-     "extends": "../../tsconfig.json",
-     "compilerOptions": {
-       "composite": true,
-       "outDir": "./dist",
-       "rootDir": "./lib"
-     },
-     "include": ["lib/**/*"],
-     "references": []
-   }
-   ```
-
-4. Add reference to root `tsconfig.json`:
-   ```json
-   "references": [
-     { "path": "./packages/new-package" }
-   ]
-   ```
-
-5. Run `bun install` to link the workspace package
-
-6. Import from anywhere in the app:
-   ```ts
-   import { something } from '@thinkix/new-package';
-   ```
+### tsconfig References
+Always add project references in root tsconfig.json:
+```json
+"references": [
+  { "path": "./packages/new-package" }
+]
+```
+This enables TypeScript's composite project mode for faster builds.
 
 ## Known Issues & Solutions
 
