@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { BoardProvider } from '@/features/board/hooks/use-board-state';
 import { BoardSwitcher, useBoardStore } from '@/features/storage';
-import type { BoardCanvasProps } from '@/features/board';
+import { Shimmer } from '@/packages/ui/src';
 
 const BoardCanvas = dynamic(
   () => import('@/features/board').then((mod) => mod.BoardCanvas),
@@ -12,7 +12,9 @@ const BoardCanvas = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center w-full h-full">
-        <div className="animate-pulse text-muted-foreground">Loading board...</div>
+               <Shimmer className='text-muted-foreground'>
+          Loading Board...
+        </Shimmer>
       </div>
     ),
   }
@@ -39,7 +41,6 @@ function BoardApp() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
     );
   }

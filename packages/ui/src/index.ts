@@ -1,4 +1,3 @@
-// Components
 export * from './components/ui/button';
 export * from './components/ui/tooltip';
 export * from './components/ui/separator';
@@ -15,7 +14,7 @@ export * from './components/ui/color-picker';
 export * from './components/ui/slider';
 export * from './components/ui/size-slider';
 export * from './components/ui/no-color-icon';
+export * from "./components/ui/shimmer";
 
-// Utils
 export * from './lib/utils';
 export * from './lib/color';

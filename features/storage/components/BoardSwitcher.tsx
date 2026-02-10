@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { FileText, ChevronDown, Plus, Trash2, Pencil, Check } from 'lucide-react';
-import { DROPDOWN_ICON_CLASS } from '@/shared/constants';
 import { Button } from '@thinkix/ui';
 import {
   DropdownMenu,
