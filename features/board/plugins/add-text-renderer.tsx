@@ -1,36 +1,21 @@
 'use client';
 
 import { createRoot } from 'react-dom/client';
-import type { PlaitTextBoard, PlaitTextElement } from '@plait/common';
+import type { PlaitTextBoard, TextProps } from '@plait/common';
 import type { Element as SlateElement, Descendant } from 'slate';
-import { createEditor, type Editor } from 'slate';
-import { withReact } from 'slate-react';
+import { createEditor } from 'slate';
+import { withReact as withSlateReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import { Slate, Editable } from 'slate-react';
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { Slate, Editable, RenderElementProps, RenderLeafProps } from 'slate-react';
+import { useMemo, useCallback, useEffect, CSSProperties } from 'react';
 import { isKeyHotkey } from 'is-hotkey';
-import { Transforms, Range, Node } from 'slate';
-import type { CustomElement, CustomText } from '@plait/common';
-import { Transforms as PlaitTransforms, Path } from '@plait/core';
-import { PlaitBoard } from '@plait/core';
-
-type ParagraphElement = CustomElement & { align?: 'left' | 'center' | 'right' };
-
-interface TextWrapperProps {
-  text?: SlateElement;
-  readonly?: boolean;
-  onChange?: (data: { newText: SlateElement; operations: any[] }) => void;
-  afterInit?: (editor: Editor) => void;
-  onComposition?: (event: CompositionEvent) => void;
-  element?: PlaitTextElement;
-  path?: Path;
-  board?: PlaitBoard;
-}
+import { Transforms, Range } from 'slate';
+import type { CustomElement, CustomText, ParagraphElement } from '@plait/common';
 
 const DEFAULT_CHINESE_TEXT = '文本';
 
 function getTextString(text: SlateElement): string {
-  return Node.string(text);
+  return text.children.map((child: any) => child.text || '').join('');
 }
 
 function normalizeTextValue(text: SlateElement | undefined): SlateElement {
@@ -61,7 +46,7 @@ function normalizeTextValue(text: SlateElement | undefined): SlateElement {
   return text;
 }
 
-const Leaf = ({ children, leaf, attributes }: any) => {
+const Leaf: React.FC<RenderLeafProps> = ({ children, leaf, attributes }) => {
   if ((leaf as CustomText).bold) {
     children = <strong>{children}</strong>;
   }
@@ -74,16 +59,32 @@ const Leaf = ({ children, leaf, attributes }: any) => {
   if ((leaf as CustomText).underlined) {
     children = <u>{children}</u>;
   }
+  if ((leaf as CustomText).strike) {
+    children = <s>{children}</s>;
+  }
+
+  const style: CSSProperties = {};
+  if ((leaf as CustomText).color) {
+    style.color = (leaf as CustomText).color;
+  }
+  const fontSize = (leaf as any)['font-size'];
+  if (fontSize) {
+    const sizeValue = typeof fontSize === 'number' ? fontSize : parseInt(fontSize, 10);
+    if (!isNaN(sizeValue)) {
+      style.fontSize = `${sizeValue}px`;
+    }
+  }
+
   return (
-    <span style={{ color: (leaf as CustomText).color }} {...attributes}>
+    <span style={style} {...attributes}>
       {children}
     </span>
   );
 };
 
-const Element = (props: any) => {
-  const { attributes, children, element } = props;
-  const style = { textAlign: (element as ParagraphElement).align } as React.CSSProperties;
+const Element = (props: RenderElementProps) => {
+  const { attributes, children, element } = props as RenderElementProps & { element: ParagraphElement };
+  const style = { textAlign: element.align } as CSSProperties;
   return (
     <div style={style} {...attributes}>
       {children}
@@ -91,58 +92,30 @@ const Element = (props: any) => {
   );
 };
 
-function TextComponent({ text: textProp, readonly, onChange, afterInit, onComposition, board, element, path }: TextWrapperProps) {
+const TextComponent: React.FC<TextProps> = (props) => {
+  const { text, readonly, onChange, onComposition, afterInit } = props;
+
+  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
+  const renderElement = useCallback((props: RenderElementProps) => <Element {...props} />, []);
+
+  const initialValue: Descendant[] = [normalizeTextValue(text)];
+
   const editor = useMemo(() => {
-    const e = withHistory(withReact(createEditor()));
+    const e = withHistory(withSlateReact(createEditor()));
     afterInit?.(e);
     return e;
   }, []);
 
-  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
-  const renderElement = useCallback((props: any) => <Element {...props} />, []);
-
-  const isLocalUpdateRef = useState(false);
-  const [, setIsLocalUpdate] = isLocalUpdateRef;
-
   useEffect(() => {
-    const normalizedText = normalizeTextValue(textProp);
-    const [currentEditorChildren] = editor.children;
-
-    if (!isLocalUpdateRef[0] && currentEditorChildren !== normalizedText) {
-      editor.children = [normalizedText];
-      editor.onChange();
+    const normalizedText = normalizeTextValue(text);
+    if (normalizedText === editor.children[0]) {
+      return;
     }
-    setIsLocalUpdate(false);
-  }, [textProp, editor]);
+    editor.children = [normalizedText];
+    editor.onChange();
+  }, [text, editor]);
 
-  const handleChange = (value: Descendant[]) => {
-    setIsLocalUpdate(true);
-    const newText = editor.children[0] as SlateElement;
-
-    // Update the Plait element's text property to persist changes
-    if (element && path) {
-      PlaitTransforms.setNode(board, { text: newText }, path);
-    } else {
-      // Find the currently selected text element
-      const selection = (board as any).selection;
-      if (selection) {
-        for (const [path, selectedElement] of Array.from(selection.entries())) {
-          const el = selectedElement as PlaitTextElement;
-          if (el.type === 'text' || el.text === textProp) {
-            PlaitTransforms.setNode(board, { text: newText }, path);
-            break;
-          }
-        }
-      }
-    }
-
-    onChange?.({
-      newText,
-      operations: editor.operations
-    });
-  };
-
-  const handleKeyDown: React.KeyboardEventHandler = (event) => {
+  const onKeyDown: React.KeyboardEventHandler = (event) => {
     const { selection } = editor;
     if (selection && Range.isCollapsed(selection)) {
       if (isKeyHotkey('left', event.nativeEvent)) {
@@ -161,48 +134,110 @@ function TextComponent({ text: textProp, readonly, onChange, afterInit, onCompos
   return (
     <Slate
       editor={editor}
-      initialValue={[normalizeTextValue(textProp)]}
-      onChange={handleChange}
+      initialValue={initialValue}
+      onChange={(value: Descendant[]) => {
+        onChange?.({
+          newText: editor.children[0] as ParagraphElement,
+          operations: editor.operations
+        });
+      }}
     >
       <Editable
         className="slate-editable-container plait-text-container"
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        readOnly={readonly ?? true}
-        onCompositionStart={(e) => onComposition?.(e as unknown as CompositionEvent)}
-        onCompositionUpdate={(e) => onComposition?.(e as unknown as CompositionEvent)}
-        onCompositionEnd={(e) => onComposition?.(e as unknown as CompositionEvent)}
-        onKeyDown={handleKeyDown}
+        readOnly={readonly === undefined ? true : readonly}
+        onCompositionStart={(event) => {
+          if (onComposition) {
+            onComposition(event as unknown as CompositionEvent);
+          }
+        }}
+        onCompositionUpdate={(event) => {
+          if (onComposition) {
+            onComposition(event as unknown as CompositionEvent);
+          }
+        }}
+        onCompositionEnd={(event) => {
+          if (onComposition) {
+            onComposition(event as unknown as CompositionEvent);
+          }
+        }}
+        onKeyDown={onKeyDown}
       />
     </Slate>
   );
-}
+};
 
-const componentMap = new Map<string, { root: any; container: Element | DocumentFragment }>();
+const componentMap = new Map<string, {
+  root: any;
+  currentEditor: ReactEditor;
+  currentProps: TextProps;
+}>();
 let renderId = 0;
-let boardRef: PlaitTextBoard | null = null;
 
 export function addTextRenderer(board: PlaitTextBoard) {
-  boardRef = board;
   board.renderText = (container, props) => {
     const id = `${container}-${renderId++}`;
 
     const root = createRoot(container);
-    componentMap.set(id, { root, container });
+    let currentEditor: ReactEditor;
 
-    root.render(<TextComponent {...props} board={boardRef as PlaitBoard} />);
+    const text = (
+      <TextComponent
+        {...props}
+        afterInit={(editor) => {
+          currentEditor = editor as ReactEditor;
+          props.afterInit && props.afterInit(editor);
+        }}
+      />
+    );
+
+    root.render(text);
+    let newProps = { ...props };
+
+    componentMap.set(id, { root, currentEditor: currentEditor!, currentProps: newProps });
 
     return {
-      update: (newProps) => {
-        root.render(<TextComponent {...newProps} board={boardRef as PlaitBoard} />);
-      },
       destroy: () => {
-        Promise.resolve().then(() => {
+        setTimeout(() => {
           root.unmount();
           componentMap.delete(id);
-        });
-      }
+        }, 0);
+      },
+      update: (updatedProps: Partial<TextProps>) => {
+        const hasUpdated =
+          updatedProps &&
+          newProps &&
+          Object.keys(updatedProps).some(
+            (key) => (updatedProps as any)[key] !== (newProps as any)[key]
+          );
+        if (!hasUpdated) {
+          return;
+        }
+        const readonly = ReactEditor.isReadOnly(currentEditor!);
+        newProps = { ...newProps, ...updatedProps };
+        root.render(
+          <TextComponent
+            {...newProps}
+            afterInit={(editor) => {
+              if (!currentEditor) {
+                currentEditor = editor as ReactEditor;
+              }
+            }}
+          />
+        );
+
+        if (readonly === true && newProps.readonly === false) {
+          setTimeout(() => {
+            ReactEditor.focus(currentEditor!);
+          }, 100);
+        } else if (readonly === false && newProps.readonly === true) {
+          ReactEditor.blur(currentEditor!);
+          ReactEditor.deselect(currentEditor!);
+        }
+      },
     };
   };
+
   return board;
 }

@@ -3,6 +3,8 @@ export type DrawingTool =
   | 'hand'
   | 'mind'
   | 'draw'
+  | 'laser'
+  | 'eraser'
   | 'rectangle'
   | 'ellipse'
   | 'diamond'

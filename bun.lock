@@ -22,6 +22,7 @@
         "idb": "^8.0.0",
         "immer": "^10.0.4",
         "is-hotkey": "^0.2.0",
+        "laser-pen": "^1.0.1",
         "lucide-react": "^0.562.0",
         "next": "16.1.1",
         "react": "19.2.3",
@@ -58,12 +59,15 @@
       "name": "@thinkix/plait-utils",
       "version": "0.0.1",
       "dependencies": {
-        "@plait/common": "^0.92.1",
-        "@plait/core": "^0.92.1",
-        "@plait/mind": "^0.92.1",
+        "@thinkix/shared": "workspace:*",
       },
       "devDependencies": {
         "typescript": "^5",
+      },
+      "peerDependencies": {
+        "@plait/common": "^0.92.1",
+        "@plait/core": "^0.92.1",
+        "@plait/mind": "^0.92.1",
       },
     },
     "packages/shared": {
@@ -974,6 +978,8 @@
 
     "language-tags": ["language-tags@https://registry.npmjs.org/language-tags/-/language-tags-1.0.9.tgz", { "dependencies": { "language-subtag-registry": "^0.3.20" } }],
 
+    "laser-pen": ["laser-pen@1.0.1", "", {}, "sha512-+K3CQK5ryLDDjX0pEdSIRXh89F6KSpm225DEymWMheg2/umhUO+na/4l8MGs2gee7VO2Mx3kyG288WGrofasoA=="],
+
     "levn": ["levn@https://registry.npmjs.org/levn/-/levn-0.4.1.tgz", { "dependencies": { "prelude-ls": "^1.2.1", "type-check": "~0.4.0" } }],
 
     "lightningcss": ["lightningcss@https://registry.npmjs.org/lightningcss/-/lightningcss-1.30.2.tgz", { "dependencies": { "detect-libc": "^2.0.3" }, "optionalDependencies": { "lightningcss-android-arm64": "1.30.2", "lightningcss-darwin-arm64": "1.30.2", "lightningcss-darwin-x64": "1.30.2", "lightningcss-freebsd-x64": "1.30.2", "lightningcss-linux-arm-gnueabihf": "1.30.2", "lightningcss-linux-arm64-gnu": "1.30.2", "lightningcss-linux-arm64-musl": "1.30.2", "lightningcss-linux-x64-gnu": "1.30.2", "lightningcss-linux-x64-musl": "1.30.2", "lightningcss-win32-arm64-msvc": "1.30.2", "lightningcss-win32-x64-msvc": "1.30.2" } }],
@@ -1386,12 +1392,6 @@
 
     "@thinkix/ai/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
-    "@thinkix/plait-utils/@plait/common": ["@plait/common@0.92.3", "", { "dependencies": { "tslib": "^2.3.0" } }, "sha512-rNQXpjpJNHP9/93+M25Gy2yw8mRNfF7RdOZuSsS0aBrG3rWp0jWFr23M0OhbM8+bFS2pkzkxqNRbDmKkm89zZQ=="],
-
-    "@thinkix/plait-utils/@plait/core": ["@plait/core@0.92.3", "", { "dependencies": { "points-on-curve": "^1.0.0", "roughjs": "^4.5.2", "tslib": "^2.3.0" }, "peerDependencies": { "immer": "^10.0.3", "is-hotkey": "^0.2.0" } }, "sha512-TRk1XNkePLGvGTQqe7scDu/C9millFnTFrM+tjZmDWscE9y+4IaMp+RcRZ/e6LGzGyRaTYMPD69twLzRQc8J3g=="],
-
-    "@thinkix/plait-utils/@plait/mind": ["@plait/mind@0.92.3", "", { "dependencies": { "tslib": "^2.3.0" } }, "sha512-0i1ewmz7WZEQyon9YBIJcPVn2vsku0orXxeRIjKNNgET4I4Ee25GJ+yS31WsHC4O+JEt4jGph/OozhFrcl5G6g=="],
-
     "@thinkix/plait-utils/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "@thinkix/shared/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
@@ -1502,16 +1502,6 @@
 
     "@plait-board/react-text/slate-react/tiny-invariant": ["tiny-invariant@https://registry.npmjs.org/tiny-invariant/-/tiny-invariant-1.3.1.tgz", {}],
 
-    "@thinkix/plait-utils/@plait/common/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
-
-    "@thinkix/plait-utils/@plait/core/points-on-curve": ["points-on-curve@1.0.1", "", {}, "sha512-3nmX4/LIiyuwGLwuUrfhTlDeQFlAhi7lyK/zcRNGhalwapDWgAGR82bUpmn2mA03vII3fvNCG8jAONzKXwpxAg=="],
-
-    "@thinkix/plait-utils/@plait/core/roughjs": ["roughjs@4.6.6", "", { "dependencies": { "hachure-fill": "^0.5.2", "path-data-parser": "^0.1.0", "points-on-curve": "^0.2.0", "points-on-path": "^0.2.1" } }, "sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ=="],
-
-    "@thinkix/plait-utils/@plait/core/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
-
-    "@thinkix/plait-utils/@plait/mind/tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
-
     "@thinkix/storage/@plait/core/points-on-curve": ["points-on-curve@1.0.1", "", {}, "sha512-3nmX4/LIiyuwGLwuUrfhTlDeQFlAhi7lyK/zcRNGhalwapDWgAGR82bUpmn2mA03vII3fvNCG8jAONzKXwpxAg=="],
 
     "@thinkix/storage/@plait/core/roughjs": ["roughjs@4.6.6", "", { "dependencies": { "hachure-fill": "^0.5.2", "path-data-parser": "^0.1.0", "points-on-curve": "^0.2.0", "points-on-path": "^0.2.1" } }, "sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ=="],
@@ -1601,14 +1591,6 @@
     "@plait-board/react-text/slate-dom/scroll-into-view-if-needed/compute-scroll-into-view": ["compute-scroll-into-view@https://registry.npmjs.org/compute-scroll-into-view/-/compute-scroll-into-view-3.1.1.tgz", {}],
 
     "@plait-board/react-text/slate-react/scroll-into-view-if-needed/compute-scroll-into-view": ["compute-scroll-into-view@https://registry.npmjs.org/compute-scroll-into-view/-/compute-scroll-into-view-3.1.1.tgz", {}],
-
-    "@thinkix/plait-utils/@plait/core/roughjs/hachure-fill": ["hachure-fill@0.5.2", "", {}, "sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg=="],
-
-    "@thinkix/plait-utils/@plait/core/roughjs/path-data-parser": ["path-data-parser@0.1.0", "", {}, "sha512-NOnmBpt5Y2RWbuv0LMzsayp3lVylAHLPUTut412ZA3l+C4uw4ZVkQbjShYCQ8TCpUMdPapr4YjUqLYD6v68j+w=="],
-
-    "@thinkix/plait-utils/@plait/core/roughjs/points-on-curve": ["points-on-curve@0.2.0", "", {}, "sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A=="],
-
-    "@thinkix/plait-utils/@plait/core/roughjs/points-on-path": ["points-on-path@0.2.1", "", { "dependencies": { "path-data-parser": "0.1.0", "points-on-curve": "0.2.0" } }, "sha512-25ClnWWuw7JbWZcgqY/gJ4FQWadKxGWk+3kR/7kD0tCaDtPPMj7oHu2ToLaVhfpnHrZzYby2w6tUA0eOIuUg8g=="],
 
     "@thinkix/storage/@plait/core/roughjs/hachure-fill": ["hachure-fill@0.5.2", "", {}, "sha512-3GKBOn+m2LX9iq+JC1064cSFprJY4jL1jCXTcpnfER5HYE2l/4EfWSGzkPa/ZDBmYI0ZOEj5VHV/eKnPGkHuOg=="],
 

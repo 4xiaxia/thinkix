@@ -15,19 +15,23 @@ import {
   PlaitBoard,
   Path,
   Transforms,
+  ATTACHED_ELEMENT_CLASS_NAME,
 } from '@plait/core';
 import { PropertyTransforms } from '@plait/common';
-import { TextTransforms } from '@plait/text-plugins';
+import { applyTextMark, applyTextColor, applyFontSize, getTextMarks } from '@thinkix/plait-utils';
 import {
   PlaitDrawElement,
-  getStrokeColorByElement as getStrokeColorByDrawElement,
   isClosedDrawElement,
+  isDrawElementsIncludeText,
+  isClosedCustomGeometry,
+  getStrokeColorByElement,
 } from '@plait/draw';
 import {
   MindElement,
   getStrokeColorByElement as getStrokeColorByMindElement,
   getFillByElement as getFillByMindElement,
 } from '@plait/mind';
+import { ScribbleElement } from '../plugins/scribble/types';
 import { isNoColor } from '@thinkix/ui';
 import { cn } from '@thinkix/ui';
 import { useFloating, flip, offset } from '@floating-ui/react';
@@ -36,6 +40,11 @@ import {
   PaintBucket,
   Pencil,
   Type as TypeIcon,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -47,14 +56,30 @@ import { Button } from '@thinkix/ui';
 import { Separator } from '@thinkix/ui';
 import { Slider } from '@thinkix/ui';
 
-const ATTACHED_ELEMENT_CLASS_NAME = 'plait-attached-element';
-
 interface ElementColors {
   fill: string;
   stroke: string;
   strokeWidth: number;
   text: string;
+  textMarks: {
+    bold?: boolean;
+    italic?: boolean;
+    underlined?: boolean;
+    strike?: boolean;
+    fontSize?: string;
+  };
 }
+
+const FONT_SIZE_OPTIONS = [
+  { value: '12', label: '12' },
+  { value: '14', label: '14' },
+  { value: '16', label: '16' },
+  { value: '18', label: '18' },
+  { value: '20', label: '20' },
+  { value: '24', label: '24' },
+  { value: '28', label: '28' },
+  { value: '32', label: '32' },
+];
 
 function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementColors | null {
   if (elements.length === 0) return null;
@@ -68,22 +93,34 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
       fill = getFillByMindElement(board, first as MindElement);
     } else if (PlaitDrawElement.isDrawElement(first)) {
       fill = (first as any).fill;
+    } else if (ScribbleElement.isScribble(first)) {
+      fill = (first as any).fill;
     }
   }
 
   if (!stroke) {
     if (MindElement.isMindElement(board, first)) {
       stroke = getStrokeColorByMindElement(board, first as MindElement);
-    } else if (PlaitDrawElement.isDrawElement(first)) {
-      stroke = getStrokeColorByDrawElement(board, first);
+    } else if (PlaitDrawElement.isDrawElement(first) || ScribbleElement.isScribble(first)) {
+      stroke = getStrokeColorByElement(board, first);
     }
   }
+
+  const textMarks = getTextMarks(first, board);
+  const textColor = textMarks?.color || '';
 
   const colors: ElementColors = {
     fill: fill || '',
     stroke: stroke || '',
     strokeWidth: (first as any).strokeWidth || 2,
-    text: (first as any).textColor || '',
+    text: textColor,
+    textMarks: {
+      bold: textMarks?.bold,
+      italic: textMarks?.italic,
+      underlined: textMarks?.underlined,
+      strike: textMarks?.strike,
+      fontSize: textMarks?.fontSize ? String(textMarks.fontSize) : undefined,
+    },
   };
 
   for (let i = 1; i < elements.length; i++) {
@@ -91,7 +128,14 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
     if (el.fill !== colors.fill) colors.fill = '';
     if ((el as any).strokeColor !== colors.stroke) colors.stroke = '';
     if ((el as any).strokeWidth !== colors.strokeWidth) colors.strokeWidth = 0;
-    if ((el as any).textColor !== colors.text) colors.text = '';
+    const elTextMarks = getTextMarks(el, board);
+    const elTextColor = elTextMarks?.color || '';
+    if (elTextColor !== colors.text) colors.text = '';
+    if (elTextMarks?.bold !== colors.textMarks.bold) colors.textMarks.bold = undefined;
+    if (elTextMarks?.italic !== colors.textMarks.italic) colors.textMarks.italic = undefined;
+    if (elTextMarks?.underlined !== colors.textMarks.underlined) colors.textMarks.underlined = undefined;
+    if (elTextMarks?.strike !== colors.textMarks.strike) colors.textMarks.strike = undefined;
+    if (elTextMarks?.fontSize !== colors.textMarks.fontSize) colors.textMarks.fontSize = undefined;
   }
 
   return colors;
@@ -100,29 +144,41 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
 function hasClosedShape(board: PlaitBoard, elements: PlaitElement[]): boolean {
   return elements.some((el) => {
     if (MindElement.isMindElement(board, el)) return true;
+    if (ScribbleElement.isScribble(el)) {
+      return isClosedCustomGeometry(board, el);
+    }
     if (PlaitDrawElement.isDrawElement(el)) {
       return isClosedDrawElement(el);
     }
-    return ['rectangle', 'ellipse', 'diamond', 'triangle', 'roundRectangle', 'polygon', 'image'].includes(
-      (el as any).type
-    );
+    return false;
   });
 }
 
 function hasStrokeProperty(board: PlaitBoard, elements: PlaitElement[]): boolean {
   return elements.some((el) => {
     if (MindElement.isMindElement(board, el)) return true;
+    if (ScribbleElement.isScribble(el)) return true;
     if (PlaitDrawElement.isDrawElement(el)) {
       return !PlaitDrawElement.isImage(el);
     }
-    return ['rectangle', 'ellipse', 'diamond', 'triangle', 'roundRectangle', 'polygon'].includes(
-      (el as any).type
-    );
+    return false;
   });
 }
 
-function hasTextElements(elements: PlaitElement[]): boolean {
-  return elements.some((el) => (el as any).type === 'text');
+function hasTextProperty(board: PlaitBoard, elements: PlaitElement[]): boolean {
+  return elements.some((el) => {
+    if (MindElement.isMindElement(board, el)) return true;
+
+    if (PlaitDrawElement.isDrawElement(el)) {
+      if (PlaitDrawElement.isText(el)) return true;
+      if (PlaitDrawElement.isShapeElement(el) && !PlaitDrawElement.isImage(el)) {
+        return true;
+      }
+      return isDrawElementsIncludeText([el]);
+    }
+
+    return false;
+  });
 }
 
 const INLINE_COLORS = [
@@ -318,22 +374,129 @@ function ColorPaletteGroup({
   );
 }
 
+function FontSizeDropdown({
+  currentFontSize,
+  onSelect,
+}: {
+  currentFontSize: string;
+  onSelect: (size: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleOpen = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleClickOutside as EventListener);
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside as EventListener);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSelect = (size: string) => {
+    onSelect(size);
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onPointerEnter={handleOpen}
+      onPointerLeave={handleClose}
+    >
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 gap-1 min-w-[50px]"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(!isOpen);
+            }}
+          >
+            <span className="text-xs font-medium">
+              {currentFontSize || '16'}
+            </span>
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p>Font Size</p>
+        </TooltipContent>
+      </Tooltip>
+
+      <div
+        className={cn(
+          'rounded-lg border bg-background/95 backdrop-blur p-1 shadow-lg transition-all duration-150 absolute top-full left-0 mt-1 z-50 min-w-fit',
+          isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        )}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerEnter={handleOpen}
+        onPointerLeave={handleClose}
+      >
+        {FONT_SIZE_OPTIONS.map((option) => (
+          <button
+            key={option.label}
+            type="button"
+            className={cn(
+              'relative flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm outline-none transition-colors w-full text-left',
+              'hover:bg-accent hover:text-accent-foreground',
+              currentFontSize === option.value && 'bg-accent text-accent-foreground'
+            )}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSelect(option.value);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function InlineColorToolbar() {
   const board = useBoard();
-  if (!board) return null;
-
   const [movingOrDragging, setMovingOrDragging] = useState(false);
   const movingOrDraggingRef = useRef(movingOrDragging);
   const [colors, setColors] = useState<ElementColors | null>(null);
-
-  const selectedElements = getSelectedElements(board);
-  const hasSelectionNow = selectedElements.length > 0 &&
-    !isSelectionMoving(board) &&
-    !movingOrDragging;
-
-  const hasFill = hasSelectionNow && hasClosedShape(board, selectedElements) && !PlaitBoard.hasBeenTextEditing(board);
-  const hasStroke = hasSelectionNow && hasStrokeProperty(board, selectedElements) && !PlaitBoard.hasBeenTextEditing(board);
-  const hasText = hasSelectionNow && hasTextElements(selectedElements);
 
   const { refs, floatingStyles } = useFloating({
     placement: 'top',
@@ -345,6 +508,8 @@ export function InlineColorToolbar() {
   }, [movingOrDragging]);
 
   useEffect(() => {
+    if (!board) return;
+    
     const { pointerUp, pointerMove } = board;
 
     board.pointerMove = (event: PointerEvent) => {
@@ -373,8 +538,20 @@ export function InlineColorToolbar() {
     };
   }, [board]);
 
+  const selectedElements = board ? getSelectedElements(board) : [];
+  const hasSelectionNow = selectedElements.length > 0 &&
+    board &&
+    !isSelectionMoving(board) &&
+    !movingOrDragging;
+
+  const hasFill = hasSelectionNow && board && hasClosedShape(board, selectedElements) && !PlaitBoard.hasBeenTextEditing(board);
+  const hasStroke = hasSelectionNow && board && hasStrokeProperty(board, selectedElements) && !PlaitBoard.hasBeenTextEditing(board);
+  const hasText = hasSelectionNow && board && hasTextProperty(board, selectedElements);
+
+  const showToolbar = hasSelectionNow && board && !PlaitBoard.hasBeenTextEditing(board);
+
   useEffect(() => {
-    if (!hasSelectionNow) return;
+    if (!hasSelectionNow || !board) return;
 
     const elements = getSelectedElements(board);
     const rectangle = getRectangleByElements(board, elements, false);
@@ -457,10 +634,33 @@ export function InlineColorToolbar() {
 
   const handleTextChange = (color: string) => {
     const newColor = isNoColor(color) ? null : color;
-    TextTransforms.setTextColor(board, newColor);
+    applyTextColor(board, newColor);
+    setTimeout(() => {
+      const elements = getSelectedElements(board);
+      const updated = getElementColors(board, elements);
+      if (updated) setColors(updated);
+    }, 0);
   };
 
-  if (!hasSelectionNow || !colors) return null;
+  const toggleMark = (mark: 'bold' | 'italic' | 'underlined' | 'strike') => {
+    applyTextMark(board, mark);
+    setTimeout(() => {
+      const elements = getSelectedElements(board);
+      const updated = getElementColors(board, elements);
+      if (updated) setColors(updated);
+    }, 0);
+  };
+
+  const setFontSize = (size: string) => {
+    applyFontSize(board, size);
+    setTimeout(() => {
+      const elements = getSelectedElements(board);
+      const updated = getElementColors(board, elements);
+      if (updated) setColors(updated);
+    }, 0);
+  };
+
+  if (!showToolbar || !colors) return null;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -471,6 +671,10 @@ export function InlineColorToolbar() {
           'inline-flex items-center gap-0.5 rounded-lg border bg-background/95 backdrop-blur p-1.5 shadow-lg',
           ATTACHED_ELEMENT_CLASS_NAME
         )}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
         {hasFill && (
           <ColorPaletteGroup
@@ -501,13 +705,116 @@ export function InlineColorToolbar() {
         {hasText && (
           <>
             {(hasFill || hasStroke) && <Separator orientation="vertical" className="mx-1 h-6" />}
-            <ColorPaletteGroup
-              icon={TypeIcon}
-              label="Text Color"
-              currentColor={colors.text}
-              colors={INLINE_COLORS}
-              onSelect={handleTextChange}
-            />
+            <div className="flex items-center gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-7 w-7 p-0',
+                      colors.textMarks.bold && 'bg-accent text-accent-foreground'
+                    )}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMark('bold');
+                    }}
+                  >
+                    <Bold className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Bold</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-7 w-7 p-0',
+                      colors.textMarks.italic && 'bg-accent text-accent-foreground'
+                    )}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMark('italic');
+                    }}
+                  >
+                    <Italic className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Italic</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-7 w-7 p-0',
+                      colors.textMarks.underlined && 'bg-accent text-accent-foreground'
+                    )}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMark('underlined');
+                    }}
+                  >
+                    <Underline className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Underline</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      'h-7 w-7 p-0',
+                      colors.textMarks.strike && 'bg-accent text-accent-foreground'
+                    )}
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleMark('strike');
+                    }}
+                  >
+                    <Strikethrough className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Strikethrough</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <FontSizeDropdown
+                currentFontSize={colors.textMarks.fontSize || '16'}
+                onSelect={(size) => {
+                  setFontSize(size);
+                }}
+              />
+
+              <div className="relative" onPointerDown={(e) => e.stopPropagation()}>
+                <ColorPaletteGroup
+                  icon={TypeIcon}
+                  label="Text Color"
+                  currentColor={colors.text}
+                  colors={INLINE_COLORS}
+                  onSelect={handleTextChange}
+                />
+              </div>
+            </div>
           </>
         )}
       </div>

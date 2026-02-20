@@ -15,8 +15,13 @@ import {
   Hexagon,
   Star,
   Cloud,
+  PenTool,
+  Eraser,
 } from 'lucide-react';
 import { MindMapIcon } from './icons';
+
+export const ERASER_POINTER = 'eraser';
+export const LASER_POINTER = 'laser';
 
 export const TOOL_TO_POINTER: Record<DrawingTool, string> = {
   hand: PlaitPointerType.hand,
@@ -24,6 +29,8 @@ export const TOOL_TO_POINTER: Record<DrawingTool, string> = {
 
   mind: 'mind',
   draw: 'ink',
+  laser: LASER_POINTER,
+  eraser: ERASER_POINTER,
 
   rectangle: 'rectangle',
   ellipse: 'ellipse',
@@ -86,6 +93,8 @@ export const DEFAULT_TOOL: DrawingTool = 'select';
 export const BASIC_TOOLS: ToolConfig[] = [
   { id: 'select', icon: <MousePointer2 className="h-6 w-6" />, label: 'Select' },
   { id: 'hand', icon: <Hand className="h-6 w-6" />, label: 'Pan' },
+  { id: 'laser', icon: <PenTool className="h-6 w-6" />, label: 'Laser' },
+  { id: 'eraser', icon: <Eraser className="h-6 w-6" />, label: 'Eraser' },
 ];
 
 export const SHAPE_TOOL_CONFIGS: ToolConfig[] = [

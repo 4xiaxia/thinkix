@@ -15,14 +15,16 @@ import {
 } from '@plait/core';
 import { withGroup, withText } from '@plait/common';
 import { withDraw } from '@plait/draw';
-import { withMind, MindThemeColors, PlaitMind } from '@plait/mind';
-import { addImageRenderer } from '../plugins/add-image-renderer';
+import { withMind, MindThemeColors } from '@plait/mind';
 import { addEmojiRenderer } from '../plugins/add-emoji-renderer';
 import { addMindNodeResize } from '../plugins/add-mind-node-resize';
 import { addPenMode } from '../plugins/add-pen-mode';
 import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
+import { withTextNormalization } from '../plugins/with-text-normalization';
 import { withScribble } from '../plugins/scribble';
+import { withEraser } from '../plugins/with-eraser';
+import { asPlaitPlugin } from '@thinkix/plait-utils/plugin-utils';
 import { useBoardState } from '../hooks/use-board-state';
 import { InlineColorToolbar } from './InlineColorToolbar';
 import { useAutoSave } from '@/features/storage';
@@ -59,20 +61,21 @@ export function BoardCanvas({
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
-    addImageRenderer,
+    asPlaitPlugin(withTextNormalization()),
     withText,
-    addTextRenderer as unknown as PlaitPlugin,
+    asPlaitPlugin(addTextRenderer),
     withSelection,
     withDraw,
     withGroup,
     withMind,
     addEmojiRenderer,
-    addMindNodeResize as unknown as PlaitPlugin,
+    asPlaitPlugin(addMindNodeResize),
     withHistory,
     withHotkey,
     addPenMode,
     addImageInteractions,
     withScribble,
+    withEraser,
   ];
 
   const handleChange = (data: BoardChangeData) => {
@@ -96,7 +99,7 @@ export function BoardCanvas({
   });
 
   return (
-    <div className={`relative w-full h-full ${className || ''}`}>
+    <div className={`relative w-full h-full board-wrapper ${className || ''}`}>
       <Wrapper
         key={boardData?.id ?? 'default'}
         value={value}

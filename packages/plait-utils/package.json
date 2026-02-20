@@ -7,18 +7,22 @@
   "types": "./lib/index.d.ts",
   "exports": {
     ".": "./lib/index.ts",
-    "./commands": "./lib/commands.ts",
-    "./types": "./lib/types.ts"
+    "./text-transforms": "./lib/text-transforms.ts",
+    "./text-accessor": "./lib/text-accessor.ts",
+    "./plugin-utils": "./lib/plugin-utils.ts"
   },
   "scripts": {
     "lint": "eslint \"lib/**/*.ts*\"",
     "typecheck": "tsc --noEmit",
     "build": "tsc"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@plait/core": "^0.92.1",
     "@plait/mind": "^0.92.1",
     "@plait/common": "^0.92.1"
+  },
+  "dependencies": {
+    "@thinkix/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5"
