@@ -76,6 +76,12 @@ export function BoardProvider({ children }: BoardProviderProps) {
         return;
       }
 
+      if (tool === 'eraser') {
+        BoardTransforms.updatePointerType(currentBoard, 'eraser');
+        setCreationMode(currentBoard, BoardCreationMode.drawing);
+        return;
+      }
+
       const pointerType = TOOL_TO_POINTER[tool];
       BoardTransforms.updatePointerType(currentBoard, pointerType);
 
