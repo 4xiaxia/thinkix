@@ -22,6 +22,7 @@ import { addMindNodeResize } from '../plugins/add-mind-node-resize';
 import { addPenMode } from '../plugins/add-pen-mode';
 import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
+import { withTextNormalization } from '../plugins/with-text-normalization';
 import { withScribble } from '../plugins/scribble';
 import { useBoardState } from '../hooks/use-board-state';
 import { InlineColorToolbar } from './InlineColorToolbar';
@@ -59,7 +60,7 @@ export function BoardCanvas({
   const [value, setValue] = useState<PlaitElement[]>(initialValue);
 
   const plugins: PlaitPlugin[] = [
-    addImageRenderer,
+    withTextNormalization() as unknown as PlaitPlugin,
     withText,
     addTextRenderer as unknown as PlaitPlugin,
     withSelection,
