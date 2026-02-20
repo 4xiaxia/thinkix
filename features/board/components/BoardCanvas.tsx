@@ -23,6 +23,7 @@ import { addImageInteractions } from '../plugins/add-image-interactions';
 import { addTextRenderer } from '../plugins/add-text-renderer';
 import { withTextNormalization } from '../plugins/with-text-normalization';
 import { withScribble } from '../plugins/scribble';
+import { withEraser } from '../plugins/with-eraser';
 import { asPlaitPlugin } from '@thinkix/plait-utils/plugin-utils';
 import { useBoardState } from '../hooks/use-board-state';
 import { InlineColorToolbar } from './InlineColorToolbar';
@@ -74,6 +75,7 @@ export function BoardCanvas({
     addPenMode,
     addImageInteractions,
     withScribble,
+    withEraser,
   ];
 
   const handleChange = (data: BoardChangeData) => {
