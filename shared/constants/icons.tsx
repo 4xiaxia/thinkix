@@ -10,3 +10,60 @@ export function MindMapIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function SolidLineIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="3" y1="12" x2="21" y2="12" />
+    </svg>
+  );
+}
+
+export function DashedLineIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="3" y1="12" x2="21" y2="12" strokeDasharray="6 3" />
+    </svg>
+  );
+}
+
+export function DottedLineIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="3" y1="12" x2="21" y2="12" strokeDasharray="2 4" />
+    </svg>
+  );
+}
+
+export function StraightArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="5" y1="19" x2="19" y2="5" />
+    </svg>
+  );
+}
+
+export function CurvedArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M5 19 Q 12 5, 19 19" />
+    </svg>
+  );
+}
+
+export function ElbowArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M5 19 L 5 12 L 19 12 L 19 5" />
+    </svg>
+  );
+}
+
+export function StartArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <polyline points="12 5, 5 12, 12 19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
