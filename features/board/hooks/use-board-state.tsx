@@ -20,7 +20,7 @@ import {
 } from '@/shared/constants';
 import type { BoardState, BoardContextValue, DrawingTool } from '@thinkix/shared';
 import type { SaveStatus } from '@thinkix/storage';
-import { LaserPointer } from '../utils/laser-pointer';
+import { LaserPointer } from '../utils';
 
 type BoardContextValueTyped = BoardContextValue<PlaitBoard>;
 

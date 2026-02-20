@@ -10,9 +10,8 @@ import {
 import { isDrawingMode } from '@plait/common';
 import { ScribbleElement } from './scribble/types';
 import { checkHitScribble } from './scribble/helpers';
-import { LaserPointer } from '../utils/laser-pointer';
-
-export const ERASER_POINTER = 'eraser';
+import { LaserPointer } from '../utils';
+import { ERASER_POINTER } from '@/shared/constants';
 
 export const withEraser = (board: PlaitBoard) => {
   const { pointerDown, pointerMove, pointerUp, globalPointerUp, touchStart } = board;

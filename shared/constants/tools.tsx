@@ -20,14 +20,17 @@ import {
 } from 'lucide-react';
 import { MindMapIcon } from './icons';
 
+export const ERASER_POINTER = 'eraser';
+export const LASER_POINTER = 'laser';
+
 export const TOOL_TO_POINTER: Record<DrawingTool, string> = {
   hand: PlaitPointerType.hand,
   select: PlaitPointerType.selection,
 
   mind: 'mind',
   draw: 'ink',
-  laser: 'laser',
-  eraser: 'eraser',
+  laser: LASER_POINTER,
+  eraser: ERASER_POINTER,
 
   rectangle: 'rectangle',
   ellipse: 'ellipse',
