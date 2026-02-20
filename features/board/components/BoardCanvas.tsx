@@ -97,7 +97,7 @@ export function BoardCanvas({
   });
 
   return (
-    <div className={`relative w-full h-full ${className || ''}`}>
+    <div className={`relative w-full h-full board-wrapper ${className || ''}`}>
       <Wrapper
         key={boardData?.id ?? 'default'}
         value={value}
