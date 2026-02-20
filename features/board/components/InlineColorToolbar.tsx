@@ -25,6 +25,11 @@ import {
   isDrawElementsIncludeText,
   isClosedCustomGeometry,
   getStrokeColorByElement,
+  getStrokeStyleByElement,
+  PlaitArrowLine,
+  ArrowLineMarkerType,
+  ArrowLineShape,
+  DrawTransforms,
 } from '@plait/draw';
 import {
   MindElement,
@@ -45,7 +50,17 @@ import {
   Underline,
   Strikethrough,
   ChevronDown,
+  ArrowRight,
 } from 'lucide-react';
+import {
+  SolidLineIcon,
+  DashedLineIcon,
+  DottedLineIcon,
+  StraightArrowIcon,
+  CurvedArrowIcon,
+  ElbowArrowIcon,
+  StartArrowIcon,
+} from '@/shared/constants/icons';
 import {
   Tooltip,
   TooltipContent,
@@ -55,11 +70,17 @@ import {
 import { Button } from '@thinkix/ui';
 import { Separator } from '@thinkix/ui';
 import { Slider } from '@thinkix/ui';
+import { StrokeStyle } from '@plait/common';
+import { ToolbarButton } from './ToolbarButton';
 
 interface ElementColors {
   fill: string;
   stroke: string;
   strokeWidth: number;
+  strokeStyle: StrokeStyle | string;
+  sourceMarker?: ArrowLineMarkerType;
+  targetMarker?: ArrowLineMarkerType;
+  arrowLineShape?: ArrowLineShape;
   text: string;
   textMarks: {
     bold?: boolean;
@@ -109,10 +130,26 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
   const textMarks = getTextMarks(first, board);
   const textColor = textMarks?.color || '';
 
+  const strokeStyle = getStrokeStyleByElement(board, first) || StrokeStyle.solid;
+
+  let sourceMarker: ArrowLineMarkerType | undefined;
+  let targetMarker: ArrowLineMarkerType | undefined;
+  let arrowLineShape: ArrowLineShape | undefined;
+
+  if (PlaitDrawElement.isArrowLine(first)) {
+    sourceMarker = (first as PlaitArrowLine).source?.marker;
+    targetMarker = (first as PlaitArrowLine).target?.marker;
+    arrowLineShape = (first as PlaitArrowLine).shape;
+  }
+
   const colors: ElementColors = {
     fill: fill || '',
     stroke: stroke || '',
     strokeWidth: (first as any).strokeWidth || 2,
+    strokeStyle,
+    sourceMarker,
+    targetMarker,
+    arrowLineShape,
     text: textColor,
     textMarks: {
       bold: textMarks?.bold,
@@ -128,6 +165,23 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
     if (el.fill !== colors.fill) colors.fill = '';
     if ((el as any).strokeColor !== colors.stroke) colors.stroke = '';
     if ((el as any).strokeWidth !== colors.strokeWidth) colors.strokeWidth = 0;
+
+    const elStrokeStyle = getStrokeStyleByElement(board, el) || StrokeStyle.solid;
+    if (elStrokeStyle !== colors.strokeStyle) colors.strokeStyle = '';
+
+    if (PlaitDrawElement.isArrowLine(el)) {
+      const elSourceMarker = (el as PlaitArrowLine).source?.marker;
+      const elTargetMarker = (el as PlaitArrowLine).target?.marker;
+      const elArrowLineShape = (el as PlaitArrowLine).shape;
+      if (elSourceMarker !== colors.sourceMarker) colors.sourceMarker = undefined;
+      if (elTargetMarker !== colors.targetMarker) colors.targetMarker = undefined;
+      if (elArrowLineShape !== colors.arrowLineShape) colors.arrowLineShape = undefined;
+    } else {
+      colors.sourceMarker = undefined;
+      colors.targetMarker = undefined;
+      colors.arrowLineShape = undefined;
+    }
+
     const elTextMarks = getTextMarks(el, board);
     const elTextColor = elTextMarks?.color || '';
     if (elTextColor !== colors.text) colors.text = '';
@@ -163,6 +217,10 @@ function hasStrokeProperty(board: PlaitBoard, elements: PlaitElement[]): boolean
     }
     return false;
   });
+}
+
+function isArrowLineOnly(elements: PlaitElement[]): boolean {
+  return elements.length > 0 && elements.every((el) => PlaitDrawElement.isArrowLine(el));
 }
 
 function hasTextProperty(board: PlaitBoard, elements: PlaitElement[]): boolean {
@@ -632,32 +690,60 @@ export function InlineColorToolbar() {
     });
   };
 
+  const handleStrokeStyleChange = (style: StrokeStyle) => {
+    PropertyTransforms.setStrokeStyle(board, style, { getMemorizeKey });
+    const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
+  };
+
+  const handleArrowMarkerChange = (end: 'source' | 'target', marker: ArrowLineMarkerType) => {
+    const elements = getSelectedElements(board);
+    elements.forEach((element) => {
+      if (PlaitDrawElement.isArrowLine(element)) {
+        const path = PlaitBoard.findPath(board, element);
+        if (path) {
+          const currentHandle = (element as PlaitArrowLine)[end] || { marker: ArrowLineMarkerType.none };
+          Transforms.setNode(board, {
+            [end]: {
+              ...currentHandle,
+              marker,
+            },
+          }, path);
+        }
+      }
+    });
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
+  };
+
+  const handleArrowLineShapeChange = (shape: ArrowLineShape) => {
+    DrawTransforms.setArrowLineShape(board, { shape });
+    const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
+  };
+
   const handleTextChange = (color: string) => {
     const newColor = isNoColor(color) ? null : color;
     applyTextColor(board, newColor);
-    setTimeout(() => {
-      const elements = getSelectedElements(board);
-      const updated = getElementColors(board, elements);
-      if (updated) setColors(updated);
-    }, 0);
+    const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
   };
 
   const toggleMark = (mark: 'bold' | 'italic' | 'underlined' | 'strike') => {
     applyTextMark(board, mark);
-    setTimeout(() => {
-      const elements = getSelectedElements(board);
-      const updated = getElementColors(board, elements);
-      if (updated) setColors(updated);
-    }, 0);
+    const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
   };
 
   const setFontSize = (size: string) => {
     applyFontSize(board, size);
-    setTimeout(() => {
-      const elements = getSelectedElements(board);
-      const updated = getElementColors(board, elements);
-      if (updated) setColors(updated);
-    }, 0);
+    const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
   };
 
   if (!showToolbar || !colors) return null;
@@ -699,6 +785,111 @@ export function InlineColorToolbar() {
               strokeWidth={colors.strokeWidth || 2}
               onStrokeWidthChange={handleStrokeWidthChange}
             />
+            <Separator orientation="vertical" className="mx-1 h-6" />
+            <div className="flex items-center gap-0.5">
+              <ToolbarButton
+                icon={<SolidLineIcon className="h-3.5 w-3.5" />}
+                label="Solid"
+                isSelected={colors.strokeStyle === StrokeStyle.solid}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStrokeStyleChange(StrokeStyle.solid);
+                }}
+              />
+
+              <ToolbarButton
+                icon={<DashedLineIcon className="h-3.5 w-3.5" />}
+                label="Dashed"
+                isSelected={colors.strokeStyle === StrokeStyle.dashed}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStrokeStyleChange(StrokeStyle.dashed);
+                }}
+              />
+
+              <ToolbarButton
+                icon={<DottedLineIcon className="h-3.5 w-3.5" />}
+                label="Dotted"
+                isSelected={colors.strokeStyle === StrokeStyle.dotted}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStrokeStyleChange(StrokeStyle.dotted);
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        {isArrowLineOnly(selectedElements) && (
+          <>
+            {(hasFill || hasStroke) && <Separator orientation="vertical" className="mx-1 h-6" />}
+            <div className="flex items-center gap-0.5">
+              <ToolbarButton
+                icon={<StraightArrowIcon className="h-3.5 w-3.5" />}
+                label="Straight Line"
+                isSelected={colors.arrowLineShape === ArrowLineShape.straight}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleArrowLineShapeChange(ArrowLineShape.straight);
+                }}
+              />
+
+              <ToolbarButton
+                icon={<CurvedArrowIcon className="h-3.5 w-3.5" />}
+                label="Curved Line"
+                isSelected={colors.arrowLineShape === ArrowLineShape.curve}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleArrowLineShapeChange(ArrowLineShape.curve);
+                }}
+              />
+
+              <ToolbarButton
+                icon={<ElbowArrowIcon className="h-3.5 w-3.5" />}
+                label="Elbow Line"
+                isSelected={colors.arrowLineShape === ArrowLineShape.elbow}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleArrowLineShapeChange(ArrowLineShape.elbow);
+                }}
+              />
+            </div>
+            <Separator orientation="vertical" className="mx-1 h-6" />
+            <div className="flex items-center gap-0.5">
+              <ToolbarButton
+                icon={<StartArrowIcon className="h-3.5 w-3.5" />}
+                label="Start Arrow"
+                isSelected={colors.sourceMarker === ArrowLineMarkerType.arrow}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const newMarker = colors.sourceMarker === ArrowLineMarkerType.arrow
+                    ? ArrowLineMarkerType.none
+                    : ArrowLineMarkerType.arrow;
+                  handleArrowMarkerChange('source', newMarker);
+                }}
+              />
+
+              <ToolbarButton
+                icon={<ArrowRight className="h-3.5 w-3.5" />}
+                label="End Arrow"
+                isSelected={colors.targetMarker === ArrowLineMarkerType.arrow}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const newMarker = colors.targetMarker === ArrowLineMarkerType.arrow
+                    ? ArrowLineMarkerType.none
+                    : ArrowLineMarkerType.arrow;
+                  handleArrowMarkerChange('target', newMarker);
+                }}
+              />
+            </div>
           </>
         )}
 
