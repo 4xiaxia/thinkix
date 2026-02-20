@@ -1,5 +1,5 @@
-import type { PlaitPlugin, PlaitBoard } from '@plait/core';
+import type { PlaitPlugin } from '@plait/core';
 
-export function asPlaitPlugin<T extends PlaitBoard>(extension: (board: T) => T): PlaitPlugin {
-  return extension as unknown as PlaitPlugin;
+export function asPlaitPlugin(plugin: (...args: unknown[]) => unknown): PlaitPlugin {
+  return plugin as unknown as PlaitPlugin;
 }
