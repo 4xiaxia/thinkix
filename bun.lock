@@ -22,6 +22,7 @@
         "idb": "^8.0.0",
         "immer": "^10.0.4",
         "is-hotkey": "^0.2.0",
+        "laser-pen": "^1.0.1",
         "lucide-react": "^0.562.0",
         "next": "16.1.1",
         "react": "19.2.3",
@@ -976,6 +977,8 @@
     "language-subtag-registry": ["language-subtag-registry@https://registry.npmjs.org/language-subtag-registry/-/language-subtag-registry-0.3.23.tgz", {}],
 
     "language-tags": ["language-tags@https://registry.npmjs.org/language-tags/-/language-tags-1.0.9.tgz", { "dependencies": { "language-subtag-registry": "^0.3.20" } }],
+
+    "laser-pen": ["laser-pen@1.0.1", "", {}, "sha512-+K3CQK5ryLDDjX0pEdSIRXh89F6KSpm225DEymWMheg2/umhUO+na/4l8MGs2gee7VO2Mx3kyG288WGrofasoA=="],
 
     "levn": ["levn@https://registry.npmjs.org/levn/-/levn-0.4.1.tgz", { "dependencies": { "prelude-ls": "^1.2.1", "type-check": "~0.4.0" } }],
 
