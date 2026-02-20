@@ -27,6 +27,7 @@ import { withEraser } from '../plugins/with-eraser';
 import { asPlaitPlugin } from '@thinkix/plait-utils/plugin-utils';
 import { useBoardState } from '../hooks/use-board-state';
 import { InlineColorToolbar } from './InlineColorToolbar';
+import { ZoomToolbar } from './ZoomToolbar';
 import { useAutoSave } from '@/features/storage';
 import type { Board as StorageBoard } from '@thinkix/storage';
 
@@ -113,6 +114,7 @@ export function BoardCanvas({
           afterInit={handleBoardInit}
         />
         <InlineColorToolbar />
+        <ZoomToolbar />
         {children}
       </Wrapper>
     </div>
