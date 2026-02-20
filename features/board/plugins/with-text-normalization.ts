@@ -2,12 +2,12 @@ import type { PlaitPlugin, PlaitBoard, PlaitI18nBoard } from '@plait/core';
 import { MindI18nKey } from '@plait/mind';
 import { DrawI18nKey } from '@plait/draw';
 
-
 export function withTextNormalization(): PlaitPlugin {
-  return (board: PlaitBoard & PlaitI18nBoard) => {
-    const originalGetI18nValue = board.getI18nValue?.bind(board);
+  return (board: PlaitBoard) => {
+    const i18nBoard = board as PlaitBoard & PlaitI18nBoard;
+    const originalGetI18nValue = i18nBoard.getI18nValue?.bind(i18nBoard);
 
-    board.getI18nValue = (key: string) => {
+    i18nBoard.getI18nValue = (key: string) => {
       if (key === MindI18nKey.mindCentralText) {
         return 'Core Idea';
       }
