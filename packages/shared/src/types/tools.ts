@@ -4,6 +4,7 @@ export type DrawingTool =
   | 'mind'
   | 'draw'
   | 'laser'
+  | 'eraser'
   | 'rectangle'
   | 'ellipse'
   | 'diamond'
