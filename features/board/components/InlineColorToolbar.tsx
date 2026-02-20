@@ -18,7 +18,7 @@ import {
   ATTACHED_ELEMENT_CLASS_NAME,
 } from '@plait/core';
 import { PropertyTransforms } from '@plait/common';
-import { applyTextMark, applyTextColor, applyFontSize, getTextMarks } from '../plugins/text-transforms';
+import { applyTextMark, applyTextColor, applyFontSize, getTextMarks } from '@thinkix/plait-utils';
 import {
   PlaitDrawElement,
   getStrokeColorByElement as getStrokeColorByDrawElement,
@@ -64,7 +64,7 @@ interface ElementColors {
     italic?: boolean;
     underlined?: boolean;
     strike?: boolean;
-    'font-size'?: string;
+    fontSize?: string;
   };
 }
 
@@ -115,7 +115,7 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
       italic: textMarks?.italic,
       underlined: textMarks?.underlined,
       strike: textMarks?.strike,
-      'font-size': textMarks?.['font-size'],
+      fontSize: textMarks?.fontSize ? String(textMarks.fontSize) : undefined,
     },
   };
 
@@ -131,7 +131,7 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
     if (elTextMarks?.italic !== colors.textMarks.italic) colors.textMarks.italic = undefined;
     if (elTextMarks?.underlined !== colors.textMarks.underlined) colors.textMarks.underlined = undefined;
     if (elTextMarks?.strike !== colors.textMarks.strike) colors.textMarks.strike = undefined;
-    if (elTextMarks?.['font-size'] !== colors.textMarks['font-size']) colors.textMarks['font-size'] = undefined;
+    if (elTextMarks?.fontSize !== colors.textMarks.fontSize) colors.textMarks.fontSize = undefined;
   }
 
   return colors;
@@ -795,7 +795,7 @@ export function InlineColorToolbar() {
               </Tooltip>
 
               <FontSizeDropdown
-                currentFontSize={colors.textMarks['font-size'] || '16'}
+                currentFontSize={colors.textMarks.fontSize || '16'}
                 onSelect={(size) => {
                   setFontSize(size);
                 }}
