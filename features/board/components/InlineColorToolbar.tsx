@@ -21,15 +21,17 @@ import { PropertyTransforms } from '@plait/common';
 import { applyTextMark, applyTextColor, applyFontSize, getTextMarks } from '@thinkix/plait-utils';
 import {
   PlaitDrawElement,
-  getStrokeColorByElement as getStrokeColorByDrawElement,
   isClosedDrawElement,
   isDrawElementsIncludeText,
+  isClosedCustomGeometry,
+  getStrokeColorByElement,
 } from '@plait/draw';
 import {
   MindElement,
   getStrokeColorByElement as getStrokeColorByMindElement,
   getFillByElement as getFillByMindElement,
 } from '@plait/mind';
+import { ScribbleElement } from '../plugins/scribble/types';
 import { isNoColor } from '@thinkix/ui';
 import { cn } from '@thinkix/ui';
 import { useFloating, flip, offset } from '@floating-ui/react';
@@ -91,14 +93,16 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
       fill = getFillByMindElement(board, first as MindElement);
     } else if (PlaitDrawElement.isDrawElement(first)) {
       fill = (first as any).fill;
+    } else if (ScribbleElement.isScribble(first)) {
+      fill = (first as any).fill;
     }
   }
 
   if (!stroke) {
     if (MindElement.isMindElement(board, first)) {
       stroke = getStrokeColorByMindElement(board, first as MindElement);
-    } else if (PlaitDrawElement.isDrawElement(first)) {
-      stroke = getStrokeColorByDrawElement(board, first);
+    } else if (PlaitDrawElement.isDrawElement(first) || ScribbleElement.isScribble(first)) {
+      stroke = getStrokeColorByElement(board, first);
     }
   }
 
@@ -140,24 +144,24 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
 function hasClosedShape(board: PlaitBoard, elements: PlaitElement[]): boolean {
   return elements.some((el) => {
     if (MindElement.isMindElement(board, el)) return true;
+    if (ScribbleElement.isScribble(el)) {
+      return isClosedCustomGeometry(board, el);
+    }
     if (PlaitDrawElement.isDrawElement(el)) {
       return isClosedDrawElement(el);
     }
-    return ['rectangle', 'ellipse', 'diamond', 'triangle', 'roundRectangle', 'polygon', 'image'].includes(
-      (el as any).type
-    );
+    return false;
   });
 }
 
 function hasStrokeProperty(board: PlaitBoard, elements: PlaitElement[]): boolean {
   return elements.some((el) => {
     if (MindElement.isMindElement(board, el)) return true;
+    if (ScribbleElement.isScribble(el)) return true;
     if (PlaitDrawElement.isDrawElement(el)) {
       return !PlaitDrawElement.isImage(el);
     }
-    return ['rectangle', 'ellipse', 'diamond', 'triangle', 'roundRectangle', 'polygon'].includes(
-      (el as any).type
-    );
+    return false;
   });
 }
 
