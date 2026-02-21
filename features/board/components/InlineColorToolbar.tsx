@@ -39,7 +39,7 @@ import {
 import { ScribbleElement } from '../plugins/scribble/types';
 import { isNoColor } from '@thinkix/ui';
 import { cn } from '@thinkix/ui';
-import { useFloating, flip, offset } from '@floating-ui/react';
+import { useFloating, flip, offset, VirtualElement } from '@floating-ui/react';
 import { getMemorizeKey } from '@plait/draw';
 import {
   PaintBucket,
@@ -60,6 +60,12 @@ import {
   CurvedArrowIcon,
   ElbowArrowIcon,
   StartArrowIcon,
+  SolidFillIcon,
+  HachureFillIcon,
+  ZigzagFillIcon,
+  CrossHatchFillIcon,
+  DotsFillIcon,
+  DashedFillIcon,
 } from '@/shared/constants/icons';
 import {
   Tooltip,
@@ -78,6 +84,7 @@ interface ElementColors {
   stroke: string;
   strokeWidth: number;
   strokeStyle: StrokeStyle | string;
+  fillStyle: string;
   sourceMarker?: ArrowLineMarkerType;
   targetMarker?: ArrowLineMarkerType;
   arrowLineShape?: ArrowLineShape;
@@ -90,6 +97,26 @@ interface ElementColors {
     fontSize?: string;
   };
 }
+
+interface StrokeFillProperties {
+  strokeColor?: string;
+  fill?: string;
+  strokeWidth?: number;
+  fillStyle?: string;
+}
+
+function getStrokeFillProperties(element: PlaitElement): StrokeFillProperties {
+  return element as PlaitElement & StrokeFillProperties;
+}
+
+const FILL_STYLE_OPTIONS = [
+  { value: 'solid', label: 'Solid', icon: SolidFillIcon },
+  { value: 'hachure', label: 'Hachure', icon: HachureFillIcon },
+  { value: 'zigzag', label: 'Zigzag', icon: ZigzagFillIcon },
+  { value: 'cross-hatch', label: 'Cross Hatch', icon: CrossHatchFillIcon },
+  { value: 'dots', label: 'Dots', icon: DotsFillIcon },
+  { value: 'dashed', label: 'Dashed', icon: DashedFillIcon },
+];
 
 const FONT_SIZE_OPTIONS = [
   { value: '12', label: '12' },
@@ -106,16 +133,17 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
   if (elements.length === 0) return null;
 
   const first = elements[0];
-  let fill = first.fill;
-  let stroke = (first as any).strokeColor;
+  const firstProps = getStrokeFillProperties(first);
+  let fill = firstProps.fill;
+  let stroke = firstProps.strokeColor;
 
   if (!fill) {
     if (MindElement.isMindElement(board, first)) {
       fill = getFillByMindElement(board, first as MindElement);
     } else if (PlaitDrawElement.isDrawElement(first)) {
-      fill = (first as any).fill;
+      fill = firstProps.fill;
     } else if (ScribbleElement.isScribble(first)) {
-      fill = (first as any).fill;
+      fill = firstProps.fill;
     }
   }
 
@@ -131,6 +159,7 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
   const textColor = textMarks?.color || '';
 
   const strokeStyle = getStrokeStyleByElement(board, first) || StrokeStyle.solid;
+  const fillStyle = firstProps.fillStyle || 'solid';
 
   let sourceMarker: ArrowLineMarkerType | undefined;
   let targetMarker: ArrowLineMarkerType | undefined;
@@ -145,8 +174,9 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
   const colors: ElementColors = {
     fill: fill || '',
     stroke: stroke || '',
-    strokeWidth: (first as any).strokeWidth || 2,
+    strokeWidth: firstProps.strokeWidth || 2,
     strokeStyle,
+    fillStyle,
     sourceMarker,
     targetMarker,
     arrowLineShape,
@@ -162,12 +192,16 @@ function getElementColors(board: PlaitBoard, elements: PlaitElement[]): ElementC
 
   for (let i = 1; i < elements.length; i++) {
     const el = elements[i];
-    if (el.fill !== colors.fill) colors.fill = '';
-    if ((el as any).strokeColor !== colors.stroke) colors.stroke = '';
-    if ((el as any).strokeWidth !== colors.strokeWidth) colors.strokeWidth = 0;
+    const elProps = getStrokeFillProperties(el);
+    if (elProps.fill !== colors.fill) colors.fill = '';
+    if (elProps.strokeColor !== colors.stroke) colors.stroke = '';
+    if (elProps.strokeWidth !== colors.strokeWidth) colors.strokeWidth = 0;
 
     const elStrokeStyle = getStrokeStyleByElement(board, el) || StrokeStyle.solid;
     if (elStrokeStyle !== colors.strokeStyle) colors.strokeStyle = '';
+
+    const elFillStyle = elProps.fillStyle || 'solid';
+    if (elFillStyle !== colors.fillStyle) colors.fillStyle = '';
 
     if (PlaitDrawElement.isArrowLine(el)) {
       const elSourceMarker = (el as PlaitArrowLine).source?.marker;
@@ -568,7 +602,8 @@ export function InlineColorToolbar() {
   useEffect(() => {
     if (!board) return;
     
-    const { pointerUp, pointerMove } = board;
+    const pointerUp = board.pointerUp?.bind(board);
+    const pointerMove = board.pointerMove?.bind(board);
 
     board.pointerMove = (event: PointerEvent) => {
       if (
@@ -577,7 +612,9 @@ export function InlineColorToolbar() {
       ) {
         setMovingOrDragging(true);
       }
-      pointerMove(event);
+      if (pointerMove) {
+        pointerMove(event);
+      }
     };
 
     board.pointerUp = (event: PointerEvent) => {
@@ -587,7 +624,9 @@ export function InlineColorToolbar() {
       ) {
         setMovingOrDragging(false);
       }
-      pointerUp(event);
+      if (pointerUp) {
+        pointerUp(event);
+      }
     };
 
     return () => {
@@ -625,7 +664,7 @@ export function InlineColorToolbar() {
     const width = screenEnd[0] - screenStart[0];
     const height = screenEnd[1] - screenStart[1];
 
-    const virtualEl = {
+    const virtualEl: VirtualElement = {
       getBoundingClientRect() {
         return {
           width,
@@ -640,7 +679,7 @@ export function InlineColorToolbar() {
       },
     };
 
-    refs.setPositionReference(virtualEl as any);
+    refs.setPositionReference(virtualEl);
 
     const elementColors = getElementColors(board, elements);
     setColors(elementColors);
@@ -693,6 +732,18 @@ export function InlineColorToolbar() {
   const handleStrokeStyleChange = (style: StrokeStyle) => {
     PropertyTransforms.setStrokeStyle(board, style, { getMemorizeKey });
     const elements = getSelectedElements(board);
+    const updated = getElementColors(board, elements);
+    if (updated) setColors(updated);
+  };
+
+  const handleFillStyleChange = (fillStyle: string) => {
+    const elements = getSelectedElements(board);
+    elements.forEach((element) => {
+      const path = PlaitBoard.findPath(board, element);
+      if (path) {
+        Transforms.setNode(board, { fillStyle }, path);
+      }
+    });
     const updated = getElementColors(board, elements);
     if (updated) setColors(updated);
   };
@@ -763,13 +814,31 @@ export function InlineColorToolbar() {
         }}
       >
         {hasFill && (
-          <ColorPaletteGroup
-            icon={PaintBucket}
-            label="Fill"
-            currentColor={colors.fill}
-            colors={INLINE_COLORS}
-            onSelect={handleFillChange}
-          />
+          <>
+            <ColorPaletteGroup
+              icon={PaintBucket}
+              label="Fill"
+              currentColor={colors.fill}
+              colors={INLINE_COLORS}
+              onSelect={handleFillChange}
+            />
+            <Separator orientation="vertical" className="mx-1 h-6" />
+            <div className="flex items-center gap-0.5">
+              {FILL_STYLE_OPTIONS.map((option) => (
+                <ToolbarButton
+                  key={option.value}
+                  icon={<option.icon className="h-3.5 w-3.5" />}
+                  label={option.label}
+                  isSelected={colors.fillStyle === option.value}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleFillStyleChange(option.value);
+                  }}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {hasStroke && (
