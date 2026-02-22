@@ -4,16 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Thinkix is an infinite canvas whiteboard application built with Next.js 16, React 19, and the Plait board library. It provides a collaborative thinking space with support for mind maps, freehand drawing, shapes, text, and images. The project uses an NX-style monorepo with workspace packages for shared code.
+Thinkix is an infinite canvas whiteboard application built with Next.js 16, React 19, and the Plait board library. It provides a collaborative thinking space with support for mind maps, freehand drawing, shapes, text, and images. The project uses Bun workspaces for shared code.
 
 ## Development Commands
 
 ```bash
-bun dev       # Start development server (Turbopack, http://localhost:3000)
-bun run build # Build for production
-bun start     # Start production server
-bun run lint  # Run ESLint
-bun install   # Install workspace dependencies
+bun dev           # Start development server (Turbopack, http://localhost:3000)
+bun run build     # Build for production
+bun start         # Start production server
+bun run lint      # Run ESLint
+bun run typecheck # Run TypeScript type checking
+bun install       # Install workspace dependencies
+
+# Testing
+bun test          # Run tests in watch mode
+bun run test:run  # Run tests once
+bun run test:coverage # Run tests with coverage report
 ```
 
 **Note:** This project uses Bun as the package manager and runtime. Install Bun from [bun.sh](https://bun.sh).
@@ -22,18 +28,20 @@ bun install   # Install workspace dependencies
 
 The project uses Bun workspaces with the following structure:
 
-```
+```text
 thinkix/
 ├── packages/              # Workspace packages
 │   ├── ui/               # @thinkix/ui - Shared UI components (shadcn-based)
 │   ├── ai/               # @thinkix/ai - AI SDK integration and utilities
 │   ├── plait-utils/      # @thinkix/plait-utils - Plait board helpers
 │   ├── storage/          # @thinkix/storage - IndexedDB storage
-│   └── shared/           # @thinkix/shared - Shared types
+│   ├── shared/           # @thinkix/shared - Shared types
+│   └── file-utils/       # @thinkix/file-utils - File I/O and board export
 │
-├── features/             # Feature modules (board, toolbar, storage, etc.)
+├── features/             # Feature modules (board, toolbar, storage)
 ├── app/                  # Next.js app router and API routes
-└── shared/               # Shared constants with JSX (icons, tool configs)
+├── shared/               # Shared constants with JSX (icons, tool configs)
+└── tests/                # Test files (unit, integration, components)
 ```
 
 ### Workspace Packages
@@ -65,6 +73,14 @@ thinkix/
 - Exports: `DrawingTool`, `ToolConfig`, `BoardState`, `BoardContextValue`
 - Import: `import type { DrawingTool } from '@thinkix/shared';`
 
+**@thinkix/file-utils** (`packages/file-utils/`)
+- File system operations and board export utilities
+- Exports: `fileOpen`, `fileSave`, `parseFileContents`, `download`, `base64ToBlob`
+- Board exports: `saveBoardToFile`, `loadBoardFromFile`, `exportAsSvg`, `exportAsPng`, `exportAsJpg`
+- Validation: `isValidThinkixData`, `sanitizeFileName`
+- Types: `ThinkixExportedData`, `FileOpenOptions`, `FileSaveOptions`
+- Import: `import { saveBoardToFile, exportAsPng } from '@thinkix/file-utils';`
+
 ### Shared Directory
 
 **Why two locations for shared code?**
@@ -76,87 +92,92 @@ The monorepo uses a dual approach to avoid type duplication issues:
 | `packages/shared/` | **Types only** (no JSX) | Workspace package, import as `@thinkix/shared` |
 | `shared/constants/` | **JSX + constants** | App-level, import as `@/shared/constants` |
 
-**Why this split?**
-- TypeScript treats each package's `node_modules/@types/react` as separate types
-- JSX requires React types, creating duplicate type instances when in packages
-- Keeping JSX in `shared/` (not a package) avoids this issue
-- Types in `packages/shared/` can be safely imported across all workspace packages
-
 **Usage:**
 ```typescript
 // Types (workspace package)
 import type { DrawingTool, BoardState } from '@thinkix/shared';
 
 // Constants with JSX (app-level)
-import { BASIC_TOOLS, TOOLBAR_ITEM_CLASS, MindMapIcon } from '@/shared/constants';
+import { BASIC_TOOLS, TOOLBAR_ITEM_CLASS } from '@/shared/constants';
 ```
 
 ## Architecture
 
 ### Feature-Based Structure
 
-```
+```text
 features/
-├── board/                    # Board canvas and state management
+├── board/                        # Board canvas and state management
 │   ├── components/
-│   │   └── BoardCanvas.tsx   # Main canvas with Plait Wrapper + plugins
+│   │   └── BoardCanvas.tsx      # Main canvas with Plait Wrapper + plugins
 │   ├── hooks/
 │   │   └── use-board-state.tsx  # Board context and tool state
-│   └── plugins/
-│       ├── add-image-renderer.tsx    # Image display via renderImage()
-│       ├── add-emoji-renderer.tsx    # Emoji display for mind maps
-│       ├── add-mind-node-resize.ts   # Width resize handles for mind nodes
-│       ├── add-pen-mode.ts           # Stylus/pencil detection
-│       ├── add-image-interactions.ts # Drag-drop, paste, view images
-│       ├── add-text-renderer.tsx     # Custom Slate-based text editor
-│       ├── image-component.tsx       # React image component
-│       ├── emoji-component.tsx       # React emoji component
-│       └── scribble/                 # Freehand drawing plugin
+│   ├── plugins/
+│   │   ├── add-image-renderer.tsx
+│   │   ├── add-emoji-renderer.tsx
+│   │   ├── add-text-renderer.tsx
+│   │   ├── add-mind-node-resize.ts
+│   │   ├── add-pen-mode.ts
+│   │   ├── add-image-interactions.ts
+│   │   ├── with-sticky-note.ts
+│   │   ├── with-eraser.ts
+│   │   ├── with-text-normalization.ts
+│   │   ├── handdrawn-mode/       # Hand-drawn style mode
+│   │   └── scribble/             # Freehand drawing plugin
+│   └── utils/
+│       └── laser-pointer.ts
 │
-├── toolbar/                  # Toolbar UI
+├── toolbar/                      # Toolbar UI
 │   └── components/
-│       └── BoardToolbar.tsx  # Tool selection and actions
+│       ├── BoardToolbar.tsx      # Main toolbar
+│       ├── AppMenu.tsx           # Application menu
+│       ├── ZoomToolbar.tsx       # Zoom controls
+│       ├── SelectionToolbar.tsx  # Selection-specific tools
+│       └── inline/               # Inline formatting controls
+│           ├── TextColorDropdown.tsx
+│           ├── FontSizeControl.tsx
+│           ├── ColorDropdown.tsx
+│           └── ArrowDropdown.tsx
+│
+└── storage/                      # Storage management
+    ├── hooks/
+    │   └── use-auto-save.ts
+    └── components/
+        └── BoardSwitcher.tsx
 
-shared/                       # Shared types and constants
-├── types/                    # TypeScript types
-└── constants/                # Tool mappings
-
-app/                          # Next.js app router and API routes
-├── api/
-│   ├── chat/                # AI chat streaming endpoint
-│   └── structure/           # Content-to-mindmap structure endpoint
+shared/constants/
+├── tools.tsx         # Tool configurations
+├── icons.tsx         # Icon components
+├── colors.ts         # Color definitions
+├── styles.ts         # Style constants
+└── inline-toolbar.ts # Inline toolbar config
 ```
 
 ### Plait Integration
 
-The board uses `@plait-board/react-board@0.4.0-2` with Plait 0.92.1 packages:
+The board uses `@plait-board/react-board@0.4.0-2` with Plait 0.92.1 packages.
 
-**Plugins** (BoardCanvas.tsx, in order):
-- `addImageRenderer` - Custom: provides `renderImage` for image display
-- `withText` - Text editing support from `@plait/common`
-- `addTextRenderer` - Custom: Slate-based text editor with auto-resize
+**Custom Plugins** (loaded in BoardCanvas.tsx):
+- `addImageRenderer` - React-based image rendering
+- `addTextRenderer` - Custom Slate-based text editor
+- `addEmojiRenderer` - Emoji rendering for mind maps
+- `addMindNodeResize` - Resize handles for mind nodes
+- `addPenMode` - Stylus/pencil detection
+- `addImageInteractions` - Drag-drop, paste, click-to-view
+- `withScribble` - Freehand drawing with smoothing
+- `withStickyNote` - Sticky note support
+- `withEraser` - Eraser tool
+- `withTextNormalization` - Text value normalization
+- `withHanddrawnMode` - Hand-drawn aesthetic mode
+
+**Standard Plait Plugins:**
+- `withText` - Text editing from `@plait/common`
 - `withSelection` - Element selection
 - `withDraw` - Drawing primitives
 - `withGroup` - Grouping support
 - `withMind` - Mind map creation
-- `addEmojiRenderer` - Custom: provides `renderEmoji` for mind map emojis
-- `addMindNodeResize` - Custom: width resize handles for mind nodes
 - `withHistory` - Undo/redo
 - `withHotkey` - Keyboard shortcuts
-- `addPenMode` - Custom: stylus/pencil detection mode
-- `addImageInteractions` - Custom: drag-drop, paste, click-to-view images
-- `withScribble` - Custom: freehand drawing with smoothing
-
-**Tool Mapping** (shared/constants/tools.ts):
-```
-select    → selection
-hand      → hand
-mind      → mind
-draw      → ink (freehand)
-rectangle → rectangle
-ellipse   → ellipse
-... etc
-```
 
 ### Custom Text Renderer
 
@@ -167,26 +188,9 @@ ellipse   → ellipse
 - Removes default Chinese text ("文本") on new text elements
 - Provides full control over editor lifecycle and state management
 
-**How it works:**
-- Creates a persistent Slate editor instance via `useMemo(() => withHistory(withReact(createEditor())), [])`
-- Uses local update tracking to prevent external prop changes from overwriting user typing
-- Normalizes null/invalid text values to prevent Slate errors
-- Replaces "文本" with empty string for new text elements
-
 **Text element properties:**
 - `autoSize: true` - Elements automatically resize to fit text content
 - Text elements use Slate JSON format: `{ children: [{ text: 'content' }] }`
-
-**If modifying text rendering:**
-- The `onChange` callback must include `newText` and `operations`
-- Editor instance must persist across renders (empty deps in useMemo)
-- Local update flag prevents infinite loops during external prop updates
-
-### Important Configuration
-
-- **next.config.ts**: Transpiles `@plait-board/*` packages (required for client-side rendering)
-- **tsconfig.json**: Path aliases `@/features/*`, `@/shared/*`, `@/components/*`
-- **Plait packages**: Do NOT use webpack resolve aliases - causes internal dependency conflicts
 
 ### State Management
 
@@ -202,47 +206,6 @@ ellipse   → ellipse
   - `duplicateElements(board)`
   - `board.undo() / board.redo()`
 
-### Custom Plugins
-
-Custom plugins use an `add*` naming pattern indicating what capability they add:
-
-**addTextRenderer** (features/board/plugins/add-text-renderer.tsx):
-- Custom Slate-based text editor implementation
-- Provides `board.renderText()` for text element rendering
-- Handles text normalization (null values, Chinese default text)
-- Manages editor state persistence across React re-renders
-
-**addImageRenderer** (features/board/plugins/add-image-renderer.tsx):
-- Provides `board.renderImage()` for React-based image rendering
-- Required by `@plait/draw`'s ImageGenerator
-
-**addEmojiRenderer** (features/board/plugins/add-emoji-renderer.tsx):
-- Provides `board.renderEmoji()` for React-based emoji rendering
-- Sets mind map plugin options for emoji spacing
-- Extends `withMind` functionality
-
-**addPenMode** (features/board/plugins/add-pen-mode.ts):
-- Detects stylus/pencil input (`pointerType: 'pen'`)
-- Filters non-pen events when in pen mode
-- Uses WeakMap for memory-safe state storage
-
-**addMindNodeResize** (features/board/plugins/add-mind-node-resize.ts):
-- 8 resize handles (corners + edges) on selected mind nodes
-- Drag any handle to resize width and/or height
-- Minimum size: 40x40px
-- Uses `Transforms.setNode` to update dimensions
-
-**addImageInteractions** (features/board/plugins/add-image-interactions.ts):
-- Drag-drop images onto canvas
-- Paste images from clipboard
-- Click mind map node images to view full size
-- Wraps `insertFragment`, `drop`, and `pointerUp`
-
-**withScribble** (features/board/plugins/scribble/):
-- Freehand drawing with Gaussian smoothing
-- Tools: `ink` (draw) and `eraser`
-- Uses Plait's `getStrokeColorByElement`, `getFillByElement`, `getStrokeWidthByElement`
-
 ### Styling
 
 - Tailwind CSS v4 with `@import "tailwindcss"` syntax
@@ -256,6 +219,64 @@ Custom plugins use an `add*` naming pattern indicating what capability they add:
 - Use feature-based organization for scalability
 - Export types from shared/ for reusability
 - Prefer early returns: `if (!board) return null;`
+
+## Testing
+
+Tests are located in `tests/` directory:
+
+```text
+tests/
+├── unit/                    # Unit tests
+│   └── file-utils.test.ts
+├── integration/             # Integration tests
+│   └── storage.test.ts
+├── components/              # Component tests
+│   └── loading-logo.test.tsx
+├── __utils__/
+│   └── test-utils.ts        # Testing utilities
+└── __mocks__/
+    └── setup.mts            # Global test setup
+```
+
+**Testing Stack:**
+- Vitest with `happy-dom` environment
+- `@testing-library/react` for component testing
+- `@vitest/coverage-v8` for coverage reports
+
+**Coverage Configuration:**
+- Excludes: `node_modules`, `scratch`, `.next`, `tests`, `app`, config files
+
+## CI/CD
+
+GitHub Actions workflow with parallel jobs:
+
+```text
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│    lint     │   │  typecheck  │   │    test     │
+│  (parallel) │   │  (parallel) │   │  (parallel) │
+└──────┬──────┘   └──────┬──────┘   └──────┬──────┘
+       │                 │                 │
+       └─────────────────┴─────────────────┘
+                         │
+                  All must pass ✓
+                         │
+                  ┌──────▼──────┐
+                  │    build    │
+                  └─────────────┘
+```
+
+**Workflow Files:**
+- `.github/workflows/ci.yml` - Main CI pipeline
+- `.github/actions/setup-bun/` - Reusable Bun setup with caching
+- `.github/actions/coverage-report/` - Coverage upload and PR comments
+- `.github/scripts/coverage-summary.sh` - Coverage parsing script
+
+## Important Configuration
+
+- **next.config.ts**: Transpiles `@plait-board/*` packages (required for client-side rendering)
+- **tsconfig.json**: Path aliases `@/features/*`, `@/shared/*`, `@/components/*`
+- **vitest.config.mts**: Test configuration with path aliases matching tsconfig
+- **Plait packages**: Do NOT use webpack resolve aliases - causes internal dependency conflicts
 
 ## Adding New Workspace Packages
 
@@ -273,22 +294,12 @@ For packages containing only TypeScript types (no JSX):
 ```
 - Do NOT add `@types/react` as devDependency (causes duplicate type conflicts)
 - Use `peerDependencies` if the package requires React at runtime
-- Add `references` to other workspace packages if needed
 
 ### Packages with JSX
 For packages containing React components (JSX):
 - Keep dependencies minimal
 - Use `peerDependencies` for React instead of regular dependencies
 - Avoid `@types/react` in devDependencies (comes from root)
-
-### tsconfig References
-Always add project references in root tsconfig.json:
-```json
-"references": [
-  { "path": "./packages/new-package" }
-]
-```
-This enables TypeScript's composite project mode for faster builds.
 
 ## Known Issues & Solutions
 
