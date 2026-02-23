@@ -14,6 +14,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
+      thresholds: {
+        lines: 85,
+        branches: 80,
+        functions: 85,
+        statements: 85,
+      },
       exclude: [
         'node_modules/**',
         'scratch/**',
@@ -23,6 +29,10 @@ export default defineConfig({
         '**/*.config.*',
         '**/index.ts',
         'app/**',
+        'features/**',
+        'packages/ui/src/components/**',
+        'packages/ui/src/hooks/**',
+        'packages/storage/lib/**',
       ],
     },
     testTimeout: 10000,
