@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, type ReactNode, useMemo, useCallback } from 'react';
-import { Board, Wrapper, type BoardChangeData, withPinchZoom } from '@plait-board/react-board';
+import { Board, Wrapper, type BoardChangeData, withPinchZoom, useListRender, useBoard } from '@plait-board/react-board';
 import {
   type PlaitElement,
   type PlaitBoardOptions,
   type PlaitPlugin,
-  type PlaitBoard,
+  PlaitBoard,
   type PlaitTheme,
   ThemeColorMode,
 } from '@plait/core';
@@ -32,6 +32,7 @@ import { GridToolbar } from '../grid/components';
 import { useAutoSave } from '@/features/storage';
 import { PencilModeIndicator } from './PencilModeIndicator';
 import type { Board as StorageBoard } from '@thinkix/storage';
+import { getSyncBus, type BoardElement } from '@thinkix/collaboration';
 
 import '@/app/styles/plait-react-board.css';
 
@@ -73,6 +74,28 @@ const createPlugins = (onPencilModeChange?: (isPencilMode: boolean) => void): Pl
   withPinchZoom,
 ];
 
+function RemoteSyncHandler({ onElementsChange }: { onElementsChange: (elements: PlaitElement[]) => void }) {
+  const board = useBoard();
+  const listRender = useListRender();
+
+  useEffect(() => {
+    const syncBus = getSyncBus();
+    
+    const unsubscribe = syncBus.subscribeToRemoteChanges((elements: BoardElement[]) => {
+      onElementsChange(elements);
+      listRender.update(elements, {
+        board: board,
+        parent: board,
+        parentG: PlaitBoard.getElementHost(board),
+      });
+    });
+
+    return unsubscribe;
+  }, [board, listRender, onElementsChange]);
+
+  return null;
+}
+
 export function BoardCanvas({
   initialValue = [],
   className,
@@ -104,6 +127,8 @@ export function BoardCanvas({
 
   const handleChange = (data: BoardChangeData) => {
     setValue(data.children);
+    const syncBus = getSyncBus();
+    syncBus.emitLocalChange(data.children as BoardElement[]);
   };
 
   const handleBoardInit = (board: PlaitBoard) => {
@@ -142,6 +167,7 @@ export function BoardCanvas({
           className="w-full h-full bg-background"
           afterInit={handleBoardInit}
         />
+        <RemoteSyncHandler onElementsChange={setValue} />
         <PencilModeIndicator />
         <SelectionToolbar />
         <ZoomToolbar />
