@@ -10,6 +10,7 @@ import type {
   UserPresence,
   SyncState,
   BoardElement,
+  UndoState,
 } from '../types';
 import { useYjsCollaboration } from './yjs-provider';
 
@@ -47,18 +48,30 @@ export interface CollaborationRoomContextValue {
   setElements: (elements: BoardElement[]) => void;
   isLocalChange: boolean;
   roomId: string;
+  undoState: UndoState;
+  undo: () => void;
+  redo: () => void;
 }
 
 export const CollaborationRoomContext = createContext<CollaborationRoomContextValue | null>(null);
 
 export function useCollaborationRoom(): CollaborationRoomContextValue {
+  const existingContext = useContext(CollaborationRoomContext);
+  if (existingContext) {
+    return existingContext;
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useCollaborationRoomLiveblocks();
+}
+
+function useCollaborationRoomLiveblocks(): CollaborationRoomContextValue {
   const yjsContext = useYjsCollaboration();
   const [, updateMyPresence] = useMyPresence();
   const others = useOthers();
   const status = useStatus();
   const room = useRoom();
 
-  const { user, elements, setElements, isLocalChange, syncState } = yjsContext;
+  const { user, elements, setElements, isLocalChange, syncState, undoState, undo, redo } = yjsContext;
 
   useEffect(() => {
     updateMyPresence({
@@ -133,6 +146,9 @@ export function useCollaborationRoom(): CollaborationRoomContextValue {
     setElements,
     isLocalChange,
     roomId: room.id,
+    undoState,
+    undo,
+    redo,
   }), [
     user,
     othersPresence,
@@ -144,6 +160,9 @@ export function useCollaborationRoom(): CollaborationRoomContextValue {
     setElements,
     isLocalChange,
     room.id,
+    undoState,
+    undo,
+    redo,
   ]);
 }
 

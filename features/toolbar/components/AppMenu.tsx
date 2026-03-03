@@ -37,7 +37,7 @@ import {
   exportAsJpg,
 } from '@thinkix/file-utils';
 import { MarkdownToMindmapDialog } from '@/features/dialogs';
-import { NicknameDialog, type CollaborationUser } from '@thinkix/collaboration';
+import { NicknameDialog, useOptionalSyncBus, type CollaborationUser, validateBoardElements, logger } from '@thinkix/collaboration';
 import posthog from 'posthog-js';
 
 export type { CollaborationUser };
@@ -59,6 +59,7 @@ interface AppMenuProps {
 export function AppMenu({ boardName, onEnableCollaboration, collaboration }: AppMenuProps) {
   const board = useBoard();
   const listRender = useListRender();
+  const syncBusContext = useOptionalSyncBus();
   const [isOpen, setIsOpen] = useState(false);
   const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
   const [isMarkdownDialogOpen, setIsMarkdownDialogOpen] = useState(false);
@@ -92,10 +93,21 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
       const data = await loadBoardFromFile();
       if (data) {
         clearAndLoad(data.elements, data.viewport, data.theme);
+        
+        if (syncBusContext) {
+          const { valid, invalid } = validateBoardElements(data.elements);
+          if (invalid.length > 0) {
+            logger.warn(`Skipped ${invalid.length} invalid board elements during file load`, { invalidCount: invalid.length });
+          }
+          syncBusContext.emitLocalChange(valid);
+        } else {
+          logger.debug('SyncBus not available, skipping file load sync');
+        }
+        
         posthog.capture('board_file_opened', { board_name: boardName, element_count: data.elements.length });
       }
     } catch (error) {
-      console.error('Failed to load file:', error);
+      logger.error('Failed to load file', error instanceof Error ? error : undefined);
       posthog.captureException(error);
     } finally {
       setIsLoading(false);
@@ -109,7 +121,7 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
       await saveBoardToFile(board, boardName);
       posthog.capture('board_file_saved', { board_name: boardName, element_count: board.children.length });
     } catch (error) {
-      console.error('Failed to save file:', error);
+      logger.error('Failed to save file', error instanceof Error ? error : undefined);
       posthog.captureException(error);
     } finally {
       setIsSaving(false);
@@ -123,7 +135,7 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
       await exportAsSvg(board, boardName);
       posthog.capture('board_exported', { format: 'svg', board_name: boardName });
     } catch (error) {
-      console.error('Failed to export SVG:', error);
+      logger.error('Failed to export SVG', error instanceof Error ? error : undefined);
       posthog.captureException(error);
     } finally {
       setIsExporting(false);
@@ -137,7 +149,7 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
       await exportAsPng(board, transparent, boardName);
       posthog.capture('board_exported', { format: 'png', transparent, board_name: boardName });
     } catch (error) {
-      console.error('Failed to export PNG:', error);
+      logger.error('Failed to export PNG', error instanceof Error ? error : undefined);
       posthog.captureException(error);
     } finally {
       setIsExporting(false);
@@ -151,7 +163,7 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
       await exportAsJpg(board, boardName);
       posthog.capture('board_exported', { format: 'jpg', board_name: boardName });
     } catch (error) {
-      console.error('Failed to export JPG:', error);
+      logger.error('Failed to export JPG', error instanceof Error ? error : undefined);
       posthog.captureException(error);
     } finally {
       setIsExporting(false);
@@ -167,6 +179,13 @@ export function AppMenu({ boardName, onEnableCollaboration, collaboration }: App
     setIsClearDialogOpen(false);
     const elementCount = board.children.length;
     clearAndLoad([]);
+    
+    if (syncBusContext) {
+      syncBusContext.emitLocalChange([]);
+    } else {
+      logger.debug('SyncBus not available, skipping clear board sync');
+    }
+    
     posthog.capture('board_cleared', { board_name: boardName, element_count: elementCount });
   };
 

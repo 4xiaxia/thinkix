@@ -7,15 +7,31 @@ import { BoardProvider } from '@/features/board/hooks/use-board-state';
 import { BoardSwitcher, useBoardStore } from '@/features/storage';
 import { LoadingLogo } from '@thinkix/ui';
 import { 
-  Room, 
-  CollaborativeBoard, 
   CollaborationStatusBar,
   CollaborativeAppMenu,
   CollaborateButton,
   CollaborationStartDialog,
 } from '@/features/collaboration';
-import { useCollaborationState, useCollaborationSession } from '@thinkix/collaboration';
+import { useCollaborationState, useCollaborationSession, SyncBusProvider, getOrCreateUser } from '@thinkix/collaboration';
+import { MockYjsProvider } from '@thinkix/collaboration/test-utils';
 import { BoardLayoutSlots } from '@/features/board';
+import { useState } from 'react';
+
+const MockCollaborativeRoom = ({ children }: { 
+  children: React.ReactNode; 
+  roomId?: string; 
+  initialElements?: unknown[];
+}) => {
+  const [user] = useState(() => getOrCreateUser());
+  
+  return (
+    <SyncBusProvider>
+      <MockYjsProvider user={user}>
+        {children}
+      </MockYjsProvider>
+    </SyncBusProvider>
+  );
+};
 
 const BoardCanvas = dynamic(
   () => import('@/features/board').then((mod) => mod.BoardCanvas),
@@ -49,7 +65,7 @@ const AppMenu = dynamic(
   { ssr: false }
 );
 
-function BoardAppContent() {
+function TestBoardAppContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -92,12 +108,9 @@ function BoardAppContent() {
     }
   }, [roomFromUrl, session]);
 
-  const roomUrl = useMemo(() => {
-    if (typeof window === 'undefined' || !roomFromUrl) return '';
-    const url = new URL(window.location.href);
-    url.searchParams.set('room', roomFromUrl);
-    return url.toString();
-  }, [roomFromUrl]);
+  const roomUrl = typeof window !== 'undefined' && roomFromUrl 
+    ? `${window.location.origin}${pathname}?room=${roomFromUrl}`
+    : '';
 
   const showStartDialog = useMemo(() => {
     return isEnabled && !!roomFromUrl && session.isInitiator && !session.wasDialogSeen;
@@ -106,12 +119,11 @@ function BoardAppContent() {
   const handleEnableCollaboration = useCallback(() => {
     const roomId = crypto.randomUUID();
     
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('room', roomId);
-    router.push(`${pathname}?${params.toString()}`);
+    const url = `${pathname}?room=${roomId}`;
+    router.push(url);
     
     enableCollaboration(roomId);
-  }, [pathname, searchParams, router, enableCollaboration]);
+  }, [pathname, router, enableCollaboration]);
 
   useEffect(() => {
     if (roomFromUrl && session.isInitiator === false) {
@@ -124,12 +136,9 @@ function BoardAppContent() {
     disableCollaboration();
     
     if (roomFromUrl) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('room');
-      const newSearch = params.toString();
-      router.push(newSearch ? `${pathname}?${newSearch}` : pathname);
+      router.push(pathname);
     }
-  }, [disableCollaboration, roomFromUrl, pathname, searchParams, router]);
+  }, [disableCollaboration, roomFromUrl, pathname, router]);
 
   useEffect(() => {
     if (!roomFromUrl && session.wasDisabled === false) {
@@ -201,20 +210,18 @@ function BoardAppContent() {
   if (isEnabled && activeRoomId) {
     return (
       <>
-        <Room roomId={activeRoomId} initialElements={currentBoard?.elements}>
-          <CollaborativeBoard>
-            <main className="w-screen h-screen overflow-hidden bg-background">
-              <BoardCanvas boardData={currentBoard}>
-                <BoardToolbar />
-                <BoardLayoutSlots
-                  topLeft={collaborativeTopLeftSlot}
-                  bottomLeft={bottomLeftSlot}
-                  topRight={collaborativeTopRightSlot}
-                />
-              </BoardCanvas>
-            </main>
-          </CollaborativeBoard>
-        </Room>
+        <MockCollaborativeRoom roomId={activeRoomId} initialElements={currentBoard?.elements}>
+          <main className="w-screen h-screen overflow-hidden bg-background">
+            <BoardCanvas boardData={currentBoard}>
+              <BoardToolbar />
+              <BoardLayoutSlots
+                topLeft={collaborativeTopLeftSlot}
+                bottomLeft={bottomLeftSlot}
+                topRight={collaborativeTopRightSlot}
+              />
+            </BoardCanvas>
+          </main>
+        </MockCollaborativeRoom>
         
         <CollaborationStartDialog
           open={showStartDialog}
@@ -247,22 +254,22 @@ function BoardAppContent() {
   );
 }
 
-function BoardApp() {
+function TestBoardApp() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center w-screen h-screen bg-background text-foreground">
         <LoadingLogo />
       </div>
     }>
-      <BoardAppContent />
+      <TestBoardAppContent />
     </Suspense>
   );
 }
 
-export default function HomePage() {
+export default function TestCollaborationPage() {
   return (
     <BoardProvider>
-      <BoardApp />
+      <TestBoardApp />
     </BoardProvider>
   );
 }
