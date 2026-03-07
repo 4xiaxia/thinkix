@@ -44,6 +44,9 @@ vi.mock('@plait/draw', () => ({
 
 vi.mock('@/shared/constants', () => ({
   STICKY_NOTE_POINTER: MOCK_STICKY_NOTE_POINTER,
+  CUSTOM_EVENTS: {
+    TOOL_CHANGE: 'thinkix:toolchange',
+  },
 }));
 
 function createMockBoard(elements: PlaitElement[] = []): PlaitBoard {
@@ -218,8 +221,10 @@ describe('with-sticky-note', () => {
 
     it('should dispatch toolchange event after creation', async () => {
       const { withStickyNote } = await import('@/features/board/plugins/with-sticky-note');
+      const { withToolSync } = await import('@/features/board/plugins/with-tool-sync');
       const board = createMockBoard();
       
+      withToolSync(board);
       withStickyNote(board);
       
       const pointerDownEvent = new PointerEvent('pointerdown', { clientX: 100, clientY: 100 });
