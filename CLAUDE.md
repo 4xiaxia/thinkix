@@ -15,6 +15,7 @@ bun start         # Start production server
 bun run lint      # Run ESLint
 bun run typecheck # Run TypeScript type checking
 bun install       # Install workspace dependencies
+bun run build:parser # Build Peggy DSL parser
 
 # Testing
 bun test          # Run tests in watch mode
@@ -53,10 +54,11 @@ thinkix/
 - Import: `import { Button } from '@thinkix/ui';`
 
 **@thinkix/ai** (`packages/ai/`)
-- Vercel AI SDK integration with multi-provider support
-- Exports: `MODELS`, `createAIProvider()`, `executeCommand()`
-- Types: `AIProvider`, `AIModel`, `UserSettings`, `CanvasCommand`
-- Import: `import { MODELS, createAIProvider } from '@thinkix/ai';`
+- AI SDK v5 integration with multi-provider support (OpenAI, Anthropic)
+- Exports: `createAIProvider()`, `resolveAIProvider()`, `resolveAIModel()`, `resolveAIKey()`, `getClientAIConfig()`, `toolSchemas`
+- Types: `AIProvider`, `ProviderConfig`, `ClientAIConfig`
+- Sub-exports: `@thinkix/ai/tool-schemas`, `@thinkix/ai/prompts`
+- Import: `import { createAIProvider, resolveAIProvider, toolSchemas } from '@thinkix/ai';`
 
 **@thinkix/plait-utils** (`packages/plait-utils/`)
 - Helper functions for Plait board operations
@@ -126,6 +128,24 @@ features/
 │   │   └── scribble/             # Freehand drawing plugin
 │   └── utils/
 │       └── laser-pointer.ts
+│
+├── agent/                        # AI Agent pane and tool execution
+│   ├── components/
+│   │   ├── AgentPane.tsx        # Main agent pane UI (Cmd+J toggle)
+│   │   ├── AgentToolRenderer.tsx # Custom tool display labels
+│   │   └── AgentSettingsDialog.tsx # API key configuration
+│   ├── hooks/
+│   │   └── use-agent-chat.ts    # AI SDK v5 chat hook with tool execution
+│   ├── tools/
+│   │   ├── file-system-ops.ts   # Tool execution (ls, read, write, patch, rm, select)
+│   │   ├── serializer.ts        # Plait elements -> DSL serialization
+│   │   └── dsl/
+│   │       ├── types.ts         # AST types (ShapeNode, StickyNode, etc.)
+│   │       ├── thinkix.peggy    # Peggy grammar for DSL parsing
+│   │       ├── parser.js        # Generated parser (run `bun run build:parser`)
+│   │       ├── parser.ts        # Parser wrapper with error handling
+│   │       └── compiler.ts      # AST -> PlaitElement compilation
+│   └── index.ts                 # Barrel export
 │
 ├── toolbar/                      # Toolbar UI
 │   └── components/
@@ -278,6 +298,75 @@ GitHub Actions workflow with parallel jobs:
 - **vitest.config.mts**: Test configuration with path aliases matching tsconfig
 - **Plait packages**: Do NOT use webpack resolve aliases - causes internal dependency conflicts
 
+## AI Environment Variables
+
+The agent supports both local per-user API keys and server-side defaults.
+
+Preferred env vars:
+
+```bash
+AI_PROVIDER=openai
+AI_MODEL=gpt-4o
+AI_API_KEY=sk-...
+AI_BASE_URL=https://api.openai.com/v1
+
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_BASE_URL=https://api.anthropic.com
+```
+
+Resolution order:
+- user-supplied agent settings from the UI
+- provider-specific env vars such as `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`
+- generic env vars such as `AI_API_KEY`, `AI_PROVIDER`, `AI_MODEL`, `AI_BASE_URL`
+- built-in provider defaults from `packages/ai/src/core.ts`
+
+The client should never receive raw keys. The UI reads a safe `/api/agent/config` response to learn whether server defaults exist and what provider/model should be shown by default.
+
+## AI Agent Architecture
+
+The AI Agent pane provides an LLM-powered assistant that can read, create, edit, and delete canvas elements via tool calling with a custom DSL.
+
+### Tech Stack
+- **AI SDK v5** (`ai` package) with `streamText` for server-side streaming
+- **AI Elements** (shadcn-based AI components) for UI: Conversation, Message, Tool, PromptInput
+- **Peggy parser generator** for DSL parsing
+- **Zod** for tool schema validation
+
+### How It Works
+1. User sends a message via `AgentPane` (Cmd+J to toggle)
+2. Request goes to `/api/agent` which streams LLM response with tool calls
+3. Client-side `useAgentChat` hook intercepts tool calls and executes them via `file-system-ops.ts`
+4. Tools operate on the Plait board: `ls`, `read`, `write`, `patch`, `rm`, `select`
+
+### DSL (Domain-Specific Language)
+Custom DSL bridges natural language to Plait elements:
+
+```text
+shape rect "My Box"                    # Create rectangle
+sticky "Note" color:yellow             # Create sticky note
+connect id:abc123 -> id:def456         # Connect elements
+mindmap "Root"                         # Create mind map
+  "Child 1"
+patch abc123 text:"New label"          # Update element
+layout grid                            # Arrange in grid
+```
+
+### Key Files
+- `features/agent/tools/dsl/thinkix.peggy` - Peggy grammar
+- `features/agent/tools/dsl/compiler.ts` - AST -> PlaitElement
+- `features/agent/tools/serializer.ts` - PlaitElement -> DSL
+- `features/agent/tools/file-system-ops.ts` - Tool execution
+- `packages/ai/prompts/system.ts` - System prompt builder
+
+### Parser Generation
+The DSL parser must be regenerated after grammar changes:
+```bash
+bun run build:parser  # Generates features/agent/tools/dsl/parser.js
+```
+
 ## Adding New Workspace Packages
 
 When creating workspace packages, follow these guidelines:
@@ -317,4 +406,3 @@ For packages containing React components (JSX):
 - **Alternative**: Drawnix reads `board.pointer` directly (simpler but no React state)
 - **Tradeoff**: More complex but provides better React integration
 - **Note**: Monitor Plait updates for native event support
-

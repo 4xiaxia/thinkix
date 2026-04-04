@@ -144,7 +144,6 @@ vi.mock('mermaid', () => ({
   },
 }));
 
-// Mock DOMPurify
 vi.mock('dompurify', () => ({
   default: {
     addHook: vi.fn(),
@@ -552,6 +551,41 @@ describe('mermaid-transformers', () => {
 
       expect(result).toBeDefined();
       expect(result.elements).toBeInstanceOf(Array);
+    });
+
+    it('preserves class metadata on class text elements', async () => {
+      const { transformClassToBoard } = await import('@thinkix/mermaid-to-thinkix');
+      const mockData = {
+        type: 'class' as const,
+        nodes: [[], [], []],
+        lines: [],
+        arrows: [],
+        namespaces: [],
+        text: [
+          {
+            type: 'text' as const,
+            x: 100,
+            y: 120,
+            text: 'Trip',
+            width: 80,
+            height: 24,
+            groupId: 'class-group-trip',
+            metadata: { classId: 'Trip' },
+          },
+        ],
+      };
+
+      const result = await transformClassToBoard(mockData);
+      const textElement = result.elements.find(
+        (element) => (element as { shape?: string }).shape === 'text',
+      ) as PlaitElement & {
+        metadata?: { classId?: string };
+        groupId?: string;
+      };
+
+      expect(textElement).toBeTruthy();
+      expect(textElement.metadata?.classId).toBe('Trip');
+      expect(textElement.groupId).toBe('mock-group');
     });
   });
 });
