@@ -2,6 +2,8 @@
 
 Thinkix is an AI-native infinite canvas for visual thinking. You can sketch, map ideas, build diagrams, and then ask an agent to inspect the board, create new structures, or edit what is already on the canvas.
 
+![thinkix-demo](https://github.com/user-attachments/assets/58deb4f4-9a7b-4423-8cc5-91da88afe3a9)
+
 ## Why Thinkix
 
 Most whiteboards stop at drawing, and most AI tools stop at chat. Thinkix combines both:
