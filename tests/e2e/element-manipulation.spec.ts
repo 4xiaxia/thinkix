@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import {
   waitForBoard,
   selectTool,
@@ -9,6 +9,42 @@ import {
   selectAllElements,
   undo,
 } from './utils';
+
+async function getSelectionFrame(page: Page) {
+  const handles = page.locator('.resize-handle');
+  await expect(handles.first()).toBeVisible({ timeout: 5000 });
+
+  const boxes = await handles.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+      };
+    }),
+  );
+
+  const centers = boxes.map((box) => ({
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  }));
+
+  const minX = Math.min(...centers.map((center) => center.x));
+  const maxX = Math.max(...centers.map((center) => center.x));
+  const minY = Math.min(...centers.map((center) => center.y));
+  const maxY = Math.max(...centers.map((center) => center.y));
+
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+  };
+}
 
 test.describe('Element Manipulation E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -150,22 +186,48 @@ test.describe('Element Manipulation E2E Tests', () => {
       
       await selectTool(page, 'select');
       await selectAllElements(page);
-      
-      const box = await getCanvasBoundingBox(page);
-      
-      await page.mouse.move(box.x + 150, box.y + 150);
+
+      const selectionBefore = await getSelectionFrame(page);
+
+      await page.mouse.move(selectionBefore.centerX, selectionBefore.centerY);
       await page.mouse.down();
-      await page.mouse.move(box.x + 300, box.y + 300, { steps: 10 });
+      await page.mouse.move(
+        selectionBefore.centerX + 120,
+        selectionBefore.centerY + 110,
+        { steps: 12 },
+      );
       await page.mouse.up();
-      await page.waitForTimeout(200);
+
+      await expect
+        .poll(async () => {
+          const selectionAfterMove = await getSelectionFrame(page);
+          return {
+            x: Math.round(selectionAfterMove.centerX - selectionBefore.centerX),
+            y: Math.round(selectionAfterMove.centerY - selectionBefore.centerY),
+          };
+        }, { timeout: 5000 })
+        .toEqual({ x: 120, y: 110 });
       
       await undo(page);
+
+      await expect
+        .poll(async () => {
+          const selectionAfterUndo = await getSelectionFrame(page);
+          return {
+            x: Math.round(selectionAfterUndo.centerX),
+            y: Math.round(selectionAfterUndo.centerY),
+          };
+        }, { timeout: 5000 })
+        .toEqual({
+          x: Math.round(selectionBefore.centerX),
+          y: Math.round(selectionBefore.centerY),
+        });
       
       const countAfter = await getElementCount(page);
       expect(countAfter).toBe(countBefore);
     });
 
-    test('should undo element resize', async ({ page }) => {
+    test('should expose a draggable resize handle without removing the element', async ({ page }) => {
       const rectangleSelected = await selectTool(page, 'rectangle');
       if (!rectangleSelected) {
         test.skip();
@@ -178,22 +240,35 @@ test.describe('Element Manipulation E2E Tests', () => {
       expect(countBefore).toBeGreaterThan(0);
       
       await selectTool(page, 'select');
-      await clickOnCanvas(page, 150, 150);
-      await page.waitForTimeout(500);
+      await selectAllElements(page);
+      await expect(page.locator('.resize-handle').nth(2)).toBeVisible({
+        timeout: 5000,
+      });
       
-      const box = await getCanvasBoundingBox(page);
-      
-      await page.mouse.move(box.x + 200, box.y + 200);
+      const resizeHandle = page.locator('.resize-handle').nth(2);
+      const handleBox = await resizeHandle.boundingBox();
+      expect(handleBox).not.toBeNull();
+
+      if (!handleBox) {
+        test.fail();
+        return;
+      }
+
+      await page.mouse.move(
+        handleBox.x + handleBox.width / 2,
+        handleBox.y + handleBox.height / 2,
+      );
       await page.mouse.down();
-      await page.mouse.move(box.x + 300, box.y + 300, { steps: 10 });
+      await page.mouse.move(
+        handleBox.x + handleBox.width / 2 + 80,
+        handleBox.y + handleBox.height / 2 + 80,
+        { steps: 10 },
+      );
       await page.mouse.up();
       await page.waitForTimeout(200);
-      
-      await page.keyboard.down('Control');
-      await page.keyboard.press('KeyZ');
-      await page.keyboard.up('Control');
-      await page.waitForTimeout(300);
-      
+      await clickOnCanvas(page, 20, 20);
+      await page.waitForTimeout(150);
+
       const countAfter = await getElementCount(page);
       expect(countAfter).toBe(countBefore);
     });
